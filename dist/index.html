@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shinobi Web</title>
+    <link rel="icon" href="assets/images/shinobi-light.png" type="image/x-icon">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet"href="https://fonts.googleapis.com/css?family=Roboto">
+</head>
+<body>
+    <div class="container">
+        <div class="logo"><img src="assets/images/Shinobi-Code.png" alt="Shinobi-Code Logo"></div>
+
+        <div class="video-container">
+            <video class="video" id="video" width="960" height="540" autoplay playsinline></video>
+            <canvas class="canvas" id="canvas"></canvas>
+            <canvas class="overlay" id="overlay"></canvas>
+        </div>
+        
+        <div>
+            <p id="speechtextStatus"></p>
+        </div>
+
+        <div class="button-container">
+            <button type="image" class="rec-button" id="record-button" title="Record Jutsu">
+                <img id="image" src="assets/images/shinobi-dark.png" alt="Record Button">
+            </button>
+            <div>
+                <input type="checkbox" id="lang">
+                <label for="lang">Japanese</label>
+            </div>
+        </div>
+    </div>
+    <div class="log-container">
+        <details>
+            <summary>Diagnostics</summary>
+                <div id="logs"></div>
+        </details>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>

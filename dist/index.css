@@ -1,0 +1,137 @@
+  @font-face {
+    font-family: 'KouzanMouhitu';
+    src: url('assets/font/KouzanMouhitu.ttf');
+    font-style: normal;
+  }
+
+  @font-face {
+  font-family: 'NJNaruto';
+  src: url('assets/font/njnaruto.ttf');
+  font-style: normal;
+  }
+
+  body {
+    background-color: whitesmoke;
+    font-family: 'Roboto', sans-serif;
+  }
+  p {
+    font-size: 20px;
+  }
+  
+  .logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 25px;
+    margin-bottom: 25px;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .video-container {
+      position: relative;
+      width: 960px;
+      height: 540px;
+  }
+  .button-container {
+    /* Optional: Add styles to the child divs */
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .video {
+    position: absolute;
+    object-fit: cover;
+    border-radius: 15px;
+    display: none;
+  }
+  .canvas {
+    display: block;
+    position: absolute;
+    object-fit: cover;
+    border-radius: 15px;
+    /*top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;*/
+  }
+  .rec-border {
+    border: 5px solid red;
+  }
+  
+  #image{
+    height: 64px;
+    width: 64px;
+  }
+
+  #speechtext, #videotext, #jutsutext {
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+
+  /*Diagnostics*/
+  summary {
+    font-size: 20px;
+  }
+  .log-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 355px;
+  }
+  #logs {
+    width: 800px;
+    height: auto;
+    background-color: #ffffff;
+    border: 1px solid gray;
+    padding: 20px;
+    overflow-y: scroll;
+    max-height: 300px;
+    margin-left: 5px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  #log-entry {
+    margin-bottom: 5px;
+    line-height: 1.4;
+  }
+  
+  /*Image as Recording button*/
+  .rec-button {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    margin: 10px;
+  }
+  .rec-button:hover {  
+    filter: brightness(0) saturate(100%) invert(20%) sepia(63%) saturate(7240%) hue-rotate(352deg) brightness(85%) contrast(112%);
+    overflow: hidden;
+  }
+  .rec-button:active {
+    transform: translateY(2px);
+  }
+  
+  .Rec{
+  animation-name: pulse;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  }
+  @keyframes pulse{
+  0%{
+    filter: drop-shadow( 0px 5px 0px rgba(173,0,0,.3));
+  }
+  65%{
+    filter: drop-shadow( 0px 5px 13px rgba(173,0,0,.3));
+  }
+  90%{
+    filter: drop-shadow( 0px 5px 13px rgba(173,0,0,0));
+  }
+  }
+
