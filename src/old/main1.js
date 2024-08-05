@@ -1,12 +1,6 @@
-
-import init, {preprocess,postprocess} from "./pkg"
-import * as ort from "onnxruntime-web"
-import { deque, labels_En, labels_symbol, speech2Text } from "./utils";
-import { getJutsu } from "./jutsu";
-
-
-//import { deque, labels_En, labels_symbol, addLog, speech2Text, getJutsu } from './utils/utils';
-let model_path = "/models/yolox_nano_with_post.onnx";
+import * as tf from '@tensorflow/tfjs';
+import { YOLOX } from './yolox';
+import { deque, labels_En, labels_symbol, addLog, speech2Text, getJutsu } from './utils/utils';
 
 
 const video = document.getElementById("video");
@@ -19,26 +13,26 @@ const speechtextStatus = document.getElementById("speechtextStatus");
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
-let isRecording = false;
-let Session, inputName, outputName;
-let speechText, timeout, jutsu;
 
-//time based variables
+let detector,rightEye,leftEye;
+
+let audio = new Audio('assets/audio/hand_sign.mp3');
+
+let isRecording = false;
+let yolox, Session;
+let speechText;
+
 let record_start_time, record_interval;
-let sign_interval, sign_start_time;
+let sign_interval, sign_interval_start;
 let sign_display_queue,sign_history_queue,sign_display_arr,sign_display;
 let jutsu_display_time, jutsu_start_time, jutsu_display;
 
-let audio = new Audio('audio/hand_sign.mp3');
+let timeout, jutsu;
+
 
 async function setup() {
-    Session = await ort.InferenceSession.create(model_path);
-    console.log(Session)
-
-    inputName = Session.inputNames[0];
-    outputName = Session.outputNames[0];
-
-    init().then(() => {console.log("Initialize done")});
+    yolox = new YOLOX();
+    Session = await yolox.createSession();
 
     sign_display_queue = new deque(18);
     sign_history_queue = new deque(18);
@@ -46,12 +40,12 @@ async function setup() {
     record_interval = 3;
     sign_interval = 3;
     jutsu_display_time = 3;
-    sign_start_time = 0;
+    sign_interval_start = 0;
+    //jutsu_index = 0;
     jutsu_start_time = 0;
     timeout = 15;
     sign_display = '';
     jutsu_display = '';
-
 }
 
 document.addEventListener('DOMContentLoaded', async() => {
@@ -76,12 +70,23 @@ video.addEventListener('play', () => {
         ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
         ctx.restore();
         
+        /*Header Box
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, 25); // Rectangle position (x, y) and size (width, height)
+        //Header Text
+        ctx.font = '20px KouzanMouhitu';
+        ctx.fillStyle = 'white';
+        ctx.fillText(text, 10, 20);*/
+
         //Footer Box
         ctx.fillStyle = 'black';
         ctx.fillRect(0, canvas.height-40, canvas.width, 40); // Rectangle position (x, y) and size (width, height)
-
+    
         if(isRecording) {
-            processFrame();
+
+            await processFrame();
+            
+            //Footer Text 
 
             if(jutsu_display) {
                 ctx.fillStyle = 'white';
@@ -93,11 +98,12 @@ video.addEventListener('play', () => {
                 ctx.font = '20px njnaruto';
                 ctx.fillText(sign_display, 20, canvas.height-10); 
             }
-
+            
             if ((Math.floor(Date.now() / 1000) - record_start_time) > record_interval) {
                 recorder.stop();
             }
-            if ((Math.floor(Date.now() / 1000) - sign_start_time) > sign_interval) {
+
+            if ((Math.floor(Date.now() / 1000) - sign_interval_start) > sign_interval) {
                 sign_display_queue.clear();
                 sign_history_queue.clear();
                 sign_display_arr = [];
@@ -106,9 +112,9 @@ video.addEventListener('play', () => {
             if ((Math.floor(Date.now() / 1000) - jutsu_start_time) > jutsu_display_time) {
                 jutsu_display = '';
             }
-            if(sign_start_time !== 0) {
-                if (Math.floor(Date.now() / 1000) - sign_start_time > timeout) {
-                    sign_start_time = 0;
+            if(sign_interval_start !== 0) {
+                if (Math.floor(Date.now() / 1000) - sign_interval_start > timeout) {
+                    sign_interval_start = 0;
                     jutsu_start_time = 0;
                     recordButton.click();
                 }
@@ -117,15 +123,13 @@ video.addEventListener('play', () => {
 
         requestAnimationFrame(draw);
     };
-
-   draw();
+    draw();
 });
-
 
 recordButton.addEventListener("click", async () => {
     if (!isRecording) {
         isRecording = true;
-        image.src = 'images/shinobi-red.png';
+        image.src = 'assets/images/shinobi-red.png';
         image.classList.add('Rec');
         canvas.classList.add('rec-border');   
         speechText = "";
@@ -139,11 +143,11 @@ recordButton.addEventListener("click", async () => {
         isRecording = false;
         image.classList.remove('Rec');
         canvas.classList.remove('rec-border');
-        image.src = 'images/shinobi-dark.png';
+        image.src = 'assets/images/shinobi-dark.png';
 
-        sign_start_time = 0;
+        sign_interval_start = 0;
         jutsu_start_time = 0;
-        speechtextStatus.textContent = "";
+        speechtextStatus.textContent = '';
     }
 });
 
@@ -164,8 +168,8 @@ navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true
         audioBlob = new Blob(audioChunks , { type: 'audio/wav'});
         audioChunks = [];
         speechText = await speech2Text(audioBlob);
-        if (speechText != null) speechtextStatus.textContent = `You said : ${speechText}`;
-        //addLog(`Speech Engine detected: ${speechText}`);
+        speechtextStatus.textContent = `You said : ${speechText}`;
+        addLog(`Speech Engine detected: ${speechText}`);
         console.log("Speech Text: ", speechText);
     }
     
@@ -178,80 +182,131 @@ navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true
 async function processFrame() {
 
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let imgArray = new Uint8Array(imgData.data);
-    //console.log('Image Data:', imgData);
-    
+    const inputs = prepare_input(imgData);
 
-    let processed = await preprocess(imgArray, imgData.width, imgData.height)
-    let ratio = parseFloat(processed.ratio)
-
-    let json_data = JSON.parse(processed.string)
-    let input = new Float32Array(json_data.data)
-
-    // Update canvas with processed image data
-    
-    /*let Canvas = document.getElementById('Canvas')
-    let Ctx = Canvas.getContext('2d')
-    Canvas.width = newImageData.width;
-    Canvas.height = newImageData.width                                                              ;
-
-    Ctx.putImageData(newImageData,0,0)*/
-    //document.body.appendChild(Canvas)
-
-    //let ndarrayJson = JSON.parse(processed.string);
-    //let input = ndarrayJson.data;
-    
-    let feeds = {};
-    feeds[inputName]  = new ort.Tensor('float32', input, [1, 3, ...[416,416]]);
-    
-    let results = await Session.run(feeds);
-    let outputData = results[outputName].cpuData
-
-    if (outputData.length != 0) {
-        let output = await postprocess(outputData, results[outputName].dims, ratio, 960,540)
-        let label = renderBox(output)
+    const outputs = await run_model(inputs);
+    console.log(outputs);
+    if (outputs) {
+        let label = renderBox(outputs.bboxes, outputs.scores, outputs.classIds);
 
         if (label) {
             if (sign_display_queue.size() == 0 || sign_display_arr[sign_display_arr.length - 1] != label) {
-                audio.play();
+                await audio.play();
 
                 sign_display_queue.push(label);
                 sign_history_queue.push(label);
                 sign_display_arr = sign_history_queue.toArray();
-                sign_start_time = Math.floor(Date.now() / 1000);  
+                sign_interval_start = Math.floor(Date.now() / 1000);  
 
                 if (sign_display_queue.size() > 0) {
                     sign_display = sign_display_arr.join(" -> ");
-
-                    jutsu = await getJutsu(sign_history_queue, speechText);
-                    console.log(jutsu)
-                    if (jutsu) {
-                        jutsu_display = jutsu;
-                        //addLog(`Jutsu: ${jutsu_display}`);
-                        jutsu_start_time = Math.floor(Date.now() / 1000);
-                        jutsu = '';
-                    }
+                    addLog(`Video Processing Engine detected: ${sign_display}`);
                 }
 
 
+                jutsu = getJutsu(sign_history_queue, speechText);
+                if (jutsu) {
+                    jutsu_display = jutsu;
+                    addLog(`Jutsu: ${jutsu_display}`);
+                    jutsu_start_time = Math.floor(Date.now() / 1000);
+                    jutsu = '';
+                }
             }
         }
 
-        output = null;
     }
-
-    feeds = null;
-    results = null;
-    outputData = null;
-
 }
 
 
-function renderBox(output) {
+//Button which starts recording and sends data to FastAPI
+/*recordButton.addEventListener("click", async () => {
+    if (!isRecording) {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+
+        recorder = new MediaRecorder(audioStream);
+
+        //To get clipboard contents
+        const clipboard = navigator.clipboard.readText().then((text) => {
+            cbtext = text;
+            })
+            .catch((error) => {
+                console.error("Error reading clipboard:", error);
+            });
+
+        let recordChunks = [];
+
+        recorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                recordChunks.push(event.data);
+            }
+        };
+            
+        recorder.onstop = async () => {
+            
+            const blob = new Blob(recordChunks, { type: 'video/webm' });
+            const file = new File([blob], "video.webm", { type: "video/webm" });
+            
+            //const reader = new FileReader();
+            //reader.onloadend = () => {
+            //const audioData = reader.result;
+            //console.log(audioData);
+            //};
+            //reader.readAsArrayBuffer(blob);
+            
+            recordChunks = [];
+            const jutsuRes = await getJutsu(cbtext,file);
+            console.log(jutsuRes);
+
+            if(jutsuRes.SpeechText) {speechText.innerHTML = jutsuRes.SpeechText;}
+            if(jutsuRes.HandSign) {videoText.innerHTML = jutsuRes.HandSign;}
+            if(jutsuRes.Jutsu) {jutsuText.innerHTML = jutsuRes.Jutsu;}
+            console.log(jutsuRes.SpeechText,jutsuRes.HandSign,jutsuRes.Jutsu);
+        };
+
+        recorder.start();
+        
+        isRecording = true;
+        image.src = 'images/shinobi-red.png';
+        image.classList.add('Rec');
+        canvas.classList.add('rec-border');
+    } else {
+        recorder.stop();
+        isRecording = false;
+        image.classList.remove('Rec');
+        canvas.classList.remove('rec-border');
+        image.src = 'images/shinobi-dark.png';
+    }
+});*/
+
+
+function prepare_input(input) {
+    let src = tf.browser.fromPixels(input);
+    src = tf.reverse(src, 2);
+    //console.log("src: ",src,src.dataSync(), src.shape, src.dtype);
+    // *** is GRAY, RGB, or RGBA, according to src.channels() is 1, 3 or 4.
+    //cv.cvtColor(src, dst, cv.COLOR_BGR2RGB);
+    return src;
+}
+  
+async function run_model(input) {
+    let predictions;
+
+    try {
+        predictions = await yolox.inference(Session, input);
+        console.log("Predictions: ", predictions);
+    } catch (e) {
+        console.log(e);
+    }
+    //console.log("Predictions: ", predictions);
+
+    return predictions;
+}
+
+
+function renderBox(bbox, score, classId) {
     
-    let bbox = JSON.parse(output.bbox)
-    let score = parseFloat(output.score)
-    let classId = parseInt(output.class_id)
+    score = parseFloat(score);
+    classId = parseInt(classId);
 
     // Check if score is above threshold
     if (score < 0.7) return;
@@ -260,11 +315,12 @@ function renderBox(output) {
     //console.log("Class ID: ", classId);
     
     // Get the bounding box
-    let x1 = Math.floor(bbox[0]);
-    let y1 = Math.floor(bbox[1]);
-    let x2 = Math.floor(bbox[2]);
-    let y2 = Math.floor(bbox[3]);
-    let fontSize = 100;
+    const x1 = Math.floor(bbox[0]);
+    const y1 = Math.floor(bbox[1]);
+    const x2 = Math.floor(bbox[2]);
+    const y2 = Math.floor(bbox[3]);
+    
+    const fontSize = 100;
 
     // Draw the rectangle
     ctx.strokeStyle = 'red';
@@ -273,6 +329,7 @@ function renderBox(output) {
     ctx.rect(x1, y1, x2 - x1, y2 - y1);
     ctx.stroke();
 
+    
     /*ctx.strokeStyle = 'rgb(0, 255, 0)'; // Green color
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -284,7 +341,6 @@ function renderBox(output) {
         ctx.font = '20px Arial';
         ctx.fillStyle = 'white';
         ctx.fillText(`ID: ${classId}, ${labels_En[classId]}, ${score.toFixed(2)}`, x1, y1-10);
-
         ctx.font = '100px Arial';
         ctx.fillStyle = 'white';
         ctx.fillText(labels_symbol[classId], x2-(fontSize+10), y2-(fontSize/4));
@@ -292,8 +348,5 @@ function renderBox(output) {
     }
 
     return labels_En[classId];
+    //document.body.appendChild(canvas);
 }
-
-
-
-  
