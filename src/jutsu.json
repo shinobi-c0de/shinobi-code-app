@@ -8,13 +8,13 @@
     "Sage Mode": "Ram" ,
     "Almighty Push": "SingleRam(left)" ,
     "Universal Pull": "SingleRam(left)" ,
-    "Sharingan": "SingleRam(Right)" ,
     "Planetary Devastation": "Gassho" ,
+    "Sharingan": "Ram" ,
     "Genjutsu": "SingleRam(Right)" ,
     "Izanagi": "Hare Boar Ram" ,
     "Kakashi Of The Sharingan": "" ,
     "Izanami": "SingleRam(Right)" ,
-    "Susanoo": "SingleRam(Right)" ,
+    "Susano": "SingleRam(Right)" ,
     "Amaterasu": "SingleRam(Right)" ,
     "Kamui": "SingleRam(Right)"
 }

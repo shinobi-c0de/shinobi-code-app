@@ -1,16 +1,16 @@
-import * as tf from '@tensorflow/tfjs';
 import { Deque } from 'data-structure-typed';
 import { AssemblyAI } from "assemblyai";
-import translate from '@sckt/translate'
+//import translate from '@sckt/translate'
 import * as wanakana from 'wanakana'
-import * as jutsuData from './jutsu.json';
+import jutsuData from './jutsu.json';
+import { engine } from '@tensorflow/tfjs';
 
 
-const speechtextStatus = document.getElementById("speechtextStatus");
-const logs = document.getElementById('logs');
+//const speechtextStatus = document.getElementById("speechtextStatus");
+//const logs = document.getElementById('logs');
 
 const client = new AssemblyAI({
-  apiKey: process.env.AssemblyAI,
+  apiKey: import.meta.env.VITE_ASSEMBLYAI,
 });
 
 
@@ -68,7 +68,7 @@ export const labels_symbol = [
 ]
 
 // Deque with max length
-  export class deque {
+export class deque {
     constructor(maxLen) {
       this.deque = new Deque();
       this.maxLen = maxLen;
@@ -106,66 +106,32 @@ export const labels_symbol = [
 
 
 
-// Preprocess function before providing image to model
-export function preprocess(image, inputSize) {
-  let paddedImage;
-  /*
-  if (image.shape[2] === 3) {
-      paddedImage = tf.variable(tf.ones([inputSize[0], inputSize[1], 3], 'int32').mul(114).cast('int32'));
-      console.log(image.shape[2]);
-  } else {
-      paddedImage = tf.variable(tf.ones(inputSize, 'int32').mul(114).cast('int32'));
-  }*/
 
-  const ratio = Math.min(inputSize[0] / image.shape[0], inputSize[1] / image.shape[1]);
-  const newSize = { width: (Math.floor(image.shape[1] * ratio)), height: (Math.floor(image.shape[0] * ratio))};
-  let resizedImage = tf.image.resizeBilinear(image, [newSize.height, newSize.width]).cast('int32');        
- 
-  paddedImage = tf.pad(resizedImage, [[0, inputSize[0] - resizedImage.shape[0]], [0, inputSize[1] - resizedImage.shape[1]], [0, 0]], 114);
 
-  paddedImage = paddedImage.transpose([2, 0, 1]);
-  paddedImage = tf.tensor(paddedImage.dataSync(), paddedImage.shape, 'float32');
+async function translate(text) {
+  let apiUrl = 'https://simplytranslate.org/api/translate/?engine=google';
+  let queryParams = new URLSearchParams({
+    from: 'ja',
+    to: 'en',
+    text: text
+  }).toString();
 
-  const preprocessedImage = paddedImage.clone();
-  tf.dispose([paddedImage, resizedImage]);
+  let fullUrl = `${apiUrl}&${queryParams}`;
 
-  return [preprocessedImage, ratio];
-}
+  try {
+    let response = await fetch(fullUrl);
+    
+    if (!response.ok) {
+      throw new Error('Network response was not ok ' + response.statusText);
+    }
 
-// Postprocess function after model inference
-export function postprocess(dets, ratio, maxWidth, maxHeight) {
-  
-  if (!dets || dets.dims[0] < 1) {
-      return null; // Handle empty or invalid detections
+    const data = await response.json();
+    console.log(data)
+    return data.translated_text
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
   }
-  dets = tf.tensor(dets.data, dets.dims, 'float32');
-
-  const classIds = dets.slice([0, 1], [-1, 1]); // Equivalent to dets[..., 1:2]
-  const scores = dets.slice([0, 2], [-1, 1]); // Equivalent to dets[..., 2:3]
-  const bboxes = dets.slice([0, 3], [-1, -1]); // Equivalent to dets[..., 3:]
-
-  const keepIdx = tf.argMax(scores); // Use tf.argMax for efficient argmax
-  let classId = tf.gather(classIds, keepIdx);
-  let score = tf.gather(scores, keepIdx);
-  
-  let bbox = tf.gather(bboxes, keepIdx).squeeze([0]); // Select first bbox element
-  bbox = tf.div(bbox, ratio); // Divide bbox by ratio
-
-  // Convert to JavaScript array for easier manipulation
-  // Apply bounding constraints
-  bbox = bbox.arraySync(); 
-  score = score.arraySync();
-  classId = classId.arraySync();
-
-  bbox[0] = Math.max(0, bbox[0]);
-  bbox[1] = Math.max(0, bbox[1]);
-  bbox[2] = Math.min(bbox[2], maxWidth);
-  bbox[3] = Math.min(bbox[3], maxHeight);
-  
-  tf.dispose([dets, keepIdx, classIds, scores, bboxes]);
-  return [bbox, score, classId];
 }
-
 
 export function addLog(message) {
   const logEntry = document.createElement('div');
@@ -179,13 +145,17 @@ export function addLog(message) {
 
 export async function speech2Text(audioBlob) {
 
-  let transcript, speechText;
-  const params = {
+  let transcript, translated, speechText;
+  /*const params = {
       audio: audioBlob,
       language_code: 'en',
       punctuate: false,
       format_text: false
-    };
+  };*/
+  const params = {
+    audio: audioBlob,
+    language: 'en'
+  }
 
   const jutsuList = [
       "Shadow Clone Jutsu",
@@ -209,12 +179,13 @@ export async function speech2Text(audioBlob) {
   ];
 
   try {
-      transcript = await client.transcripts.transcribe(params);
+      //transcript = await client.transcripts.transcribe(params);
+      transcript = await speech2TextAPI(params)
+      speechText = transcript.text
   } catch(err) {
       speechtextStatus.textContent = "Error: " + err;
       console.error('Speech recognition error: ' + err);
   }
-  speechText = transcript.text;
 
   if (speechText){
       speechText = speechText.split(" ");
@@ -225,21 +196,23 @@ export async function speech2Text(audioBlob) {
   }
 
   if (!jutsuList.includes(speechText)) {
-      console.log(speechText);
-      params.language_code = 'ja';
+      params.language = 'ja';
       try{
-          transcript = await client.transcripts.transcribe(params);
+          //transcript = await client.transcripts.transcribe(params);
+          transcript = await speech2TextAPI(params)
+          speechText = transcript.text;
       } catch(err) {
           speechtextStatus.textContent = "Error: " + err;
           console.error('Speech recognition error: ' + err);
       }
-      speechText = transcript.text;
   }
 
   const isJapanese = wanakana.isJapanese(speechText);
   if (isJapanese) {
       try {
-          speechText = await translate(speechText, {from: "ja", engine: "lingva"});
+        console.log(speechText)
+        speechText = await translate(speechText);
+        console.log(speechText)
       } catch(err) {
           console.error(err);
           speechText = "";
@@ -255,13 +228,30 @@ export async function speech2Text(audioBlob) {
       }
       speechText = speechText.join(" ");
       
-      return speechText;
   }
-  /*if (lang.checked) {
-      recognition.lang = "ja-JP";
-  } else {
-      recognition.lang = "en-IN";
-  }*/
+ 
+  return speechText;
+
+}
+
+async function speech2TextAPI(params) {
+  let endpoint = `http://localhost:8080/speech2text/`
+  
+  try {
+      const formData = new FormData();
+      formData.append('file', params.audio, 'recording.wav');
+      formData.append('lang',params.language)
+
+      const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData
+      });
+      const data = await response.json();
+      return data
+
+  } catch(err) {
+  console.error('ERROR:', err);
+}
 }
 
 // Jutsu function
@@ -272,10 +262,12 @@ export function getJutsu(signHistory,speechText) {
     let handSigns = signHistory.join(' ');
 
     let keys = Object.keys(jutsuData);
+
     for (let key in keys) {
         let data = keys[key];
         if(jutsuData[data] === handSigns) res.push(data);
     }
+    console.log(res)
     for (let i = 0; i < res.length; i++) {
         if( speechText === res[i]) jutsu = res[i];
     }
@@ -292,7 +284,7 @@ async function playJutsuSound(jutsu) {
     for (let i = 0; i < jutsu.length; i++) {
       if (jutsu[i] === "Jutsu") {
         jutsu = jutsu[i];
-        audio = new Audio('assets/audio/jutsu.mp3'); 
+        audio = new Audio('audio/jutsu.mp3'); 
       }
     }
     audio.play();
