@@ -20,7 +20,7 @@ export async function getJutsu(signHistory,speechText) {
         let data = keys[key];
         if(jutsuData[data] === handSigns) res.push(data);
     }
-    console.log(res)
+    
     for (let i = 0; i < res.length; i++) {
         if( speechText === res[i]) jutsu = res[i];
     }

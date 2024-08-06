@@ -1,6 +1,5 @@
-
-import init, {preprocess,postprocess} from "./pkg"
 import * as ort from "onnxruntime-web"
+import init, {preprocess,postprocess} from "./pkg"
 import { deque, labels_En, labels_symbol, speech2Text } from "./utils";
 import { getJutsu } from "./jutsu";
 
@@ -33,7 +32,7 @@ let audio = new Audio('audio/hand_sign.mp3');
 
 async function setup() {
     Session = await ort.InferenceSession.create(model_path);
-    console.log(Session)
+    console.log("Inference session created", Session);
 
     inputName = Session.inputNames[0];
     outputName = Session.outputNames[0];
@@ -223,8 +222,10 @@ async function processFrame() {
                 if (sign_display_queue.size() > 0) {
                     sign_display = sign_display_arr.join(" -> ");
 
-                    jutsu = await getJutsu(sign_history_queue, speechText);
-                    console.log(jutsu)
+                    if (speechText) {
+                        jutsu = await getJutsu(sign_history_queue, speechText);
+                        console.log(jutsu)
+                    }
                     if (jutsu) {
                         jutsu_display = jutsu;
                         //addLog(`Jutsu: ${jutsu_display}`);
@@ -285,7 +286,7 @@ function renderBox(output) {
         ctx.fillStyle = 'white';
         ctx.fillText(`ID: ${classId}, ${labels_En[classId]}, ${score.toFixed(2)}`, x1, y1-10);
 
-        ctx.font = '100px Arial';
+        ctx.font = '100px Arial'; //KouzanMouhitu
         ctx.fillStyle = 'white';
         ctx.fillText(labels_symbol[classId], x2-(fontSize+10), y2-(fontSize/4));
 
