@@ -1,6 +1,7 @@
 import * as ort from "onnxruntime-web"
 import init, {preprocess,postprocess} from "./pkg"
-import { deque, labels_En, labels_symbol, speech2Text } from "./utils";
+import { deque, labels_En, labels_symbol, speech2Text, createFaceLandmarker } from "./utils";
+import { sharingan_keys, detect } from "./iris";
 import { getJutsu } from "./jutsu";
 
 
@@ -18,9 +19,12 @@ const speechtextStatus = document.getElementById("speechtextStatus");
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
-let isRecording = false;
+let isRecording;
 let Session, inputName, outputName;
-let speechText, timeout, jutsu;
+let speechText, timeout, jutsu, Jutsu;
+
+//Iris
+let faceLandmarker;
 
 //time based variables
 let record_start_time, record_interval;
@@ -36,6 +40,8 @@ async function setup() {
 
     inputName = Session.inputNames[0];
     outputName = Session.outputNames[0];
+
+    faceLandmarker = await createFaceLandmarker();
 
     init().then(() => {console.log("Initialize done")});
 
@@ -82,6 +88,7 @@ video.addEventListener('play', () => {
         if(isRecording) {
             processFrame();
 
+
             if(jutsu_display) {
                 ctx.fillStyle = 'white';
                 ctx.font = '20px njnaruto';
@@ -109,7 +116,7 @@ video.addEventListener('play', () => {
                 if (Math.floor(Date.now() / 1000) - sign_start_time > timeout) {
                     sign_start_time = 0;
                     jutsu_start_time = 0;
-                    recordButton.click();
+                    //recordButton.click();
                 }
             }
         }
@@ -142,6 +149,8 @@ recordButton.addEventListener("click", async () => {
 
         sign_start_time = 0;
         jutsu_start_time = 0;
+        jutsu = '';
+        Jutsu = '';
         speechtextStatus.textContent = "";
     }
 });
@@ -177,9 +186,7 @@ navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true
 async function processFrame() {
 
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let imgArray = new Uint8Array(imgData.data);
-    //console.log('Image Data:', imgData);
-    
+    let imgArray = new Uint8Array(imgData.data);    
 
     let processed = await preprocess(imgArray, imgData.width, imgData.height)
     let ratio = parseFloat(processed.ratio)
@@ -187,24 +194,22 @@ async function processFrame() {
     let json_data = JSON.parse(processed.string)
     let input = new Float32Array(json_data.data)
 
-    // Update canvas with processed image data
-    
-    /*let Canvas = document.getElementById('Canvas')
-    let Ctx = Canvas.getContext('2d')
-    Canvas.width = newImageData.width;
-    Canvas.height = newImageData.width                                                              ;
-
-    Ctx.putImageData(newImageData,0,0)*/
-    //document.body.appendChild(Canvas)
-
-    //let ndarrayJson = JSON.parse(processed.string);
-    //let input = ndarrayJson.data;
     
     let feeds = {};
     feeds[inputName]  = new ort.Tensor('float32', input, [1, 3, ...[416,416]]);
     
     let results = await Session.run(feeds);
     let outputData = results[outputName].cpuData
+
+    if (sharingan_keys.includes(jutsu)) {
+        let landmarks;
+
+        const Iresults = await faceLandmarker.detect(canvas);
+        if (Iresults.faceLandmarks[0]) {
+            landmarks = Iresults.faceLandmarks[0].map(({ x, y }) => ({ x, y }));
+            detect(jutsu, landmarks,canvas.width,canvas.height);
+        }
+    }
 
     if (outputData.length != 0) {
         let output = await postprocess(outputData, results[outputName].dims, ratio, 960,540)
@@ -222,19 +227,25 @@ async function processFrame() {
                 if (sign_display_queue.size() > 0) {
                     sign_display = sign_display_arr.join(" -> ");
 
-                    if (speechText) {
+                    //Speechtext is available and jutsu is not evaluated
+                    if (speechText && !jutsu) {
                         jutsu = await getJutsu(sign_history_queue, speechText);
-                        console.log(jutsu)
                     }
-                    if (jutsu) {
-                        jutsu_display = jutsu;
+                    //Jutsu is already evaluated
+                    if (jutsu && !Jutsu) {
+                        //jutsu formatting
+                        Jutsu = jutsu.split(" ");
+                        for (let i = 0; i < Jutsu.length; i++) {
+                            Jutsu[i] = Jutsu[i][0].toUpperCase() + Jutsu[i].slice(1);
+                        }
+                        Jutsu = Jutsu.join(" ");
+
+                        console.log("Jutsu: ", Jutsu);
+                        jutsu_display = Jutsu;
                         //addLog(`Jutsu: ${jutsu_display}`);
                         jutsu_start_time = Math.floor(Date.now() / 1000);
-                        jutsu = '';
                     }
                 }
-
-
             }
         }
 
@@ -258,7 +269,6 @@ function renderBox(output) {
     if (score < 0.7) return;
 
     classId = classId + 1;
-    //console.log("Class ID: ", classId);
     
     // Get the bounding box
     let x1 = Math.floor(bbox[0]);
@@ -286,7 +296,7 @@ function renderBox(output) {
         ctx.fillStyle = 'white';
         ctx.fillText(`ID: ${classId}, ${labels_En[classId]}, ${score.toFixed(2)}`, x1, y1-10);
 
-        ctx.font = '100px Arial'; //KouzanMouhitu
+        ctx.font = '100px KouzanMouhitu'; //KouzanMouhitu
         ctx.fillStyle = 'white';
         ctx.fillText(labels_symbol[classId], x2-(fontSize+10), y2-(fontSize/4));
 
