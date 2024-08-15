@@ -1,6 +1,8 @@
 import { Deque } from 'data-structure-typed';
 import * as wanakana from 'wanakana'
+import * as vision from '@mediapipe/tasks-vision'
 
+const { FaceLandmarker, FilesetResolver, DrawingUtils } = vision;
 
 const speechtextStatus = document.getElementById("speechtextStatus");
 //const logs = document.getElementById('logs');
@@ -97,9 +99,24 @@ export class deque {
   }
 
 
+export async function createFaceLandmarker() {
+  const filesetResolver = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+  );
+  let faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+    baseOptions: {
+      modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
+      delegate: "GPU"
+    },
+    //outputFaceBlendshapes: true,
+    //runningMode,
+    numFaces: 1
+  });
 
+  return faceLandmarker;
+}
 
-
+  
 export function addLog(message) {
   const logEntry = document.createElement('div');
   logEntry.classList.add('log-entry');
@@ -119,7 +136,7 @@ export async function speech2Text(audioBlob) {
       "summoning jutsu",
       "reanimation jutsu",
       "release",
-      "fire style fireball jutsu",
+      "fire release fireball jutsu",
       "chidori",
       "sage mode",
       "almighty push",
@@ -138,7 +155,6 @@ export async function speech2Text(audioBlob) {
   try {
     transcript = await speech2TextAPI(audioBlob)
     speechText = transcript.text;
-    console.log(transcript)
   } catch(err) {
       console.error('Speech recognition error: ' + err);
   }
@@ -165,7 +181,6 @@ export async function speech2Text(audioBlob) {
     speechText = null
   }
 
-  
   return speechText;
 }
 
