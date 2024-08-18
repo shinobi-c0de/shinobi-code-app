@@ -9,14 +9,13 @@ eyeImage.src = '/images/sharingan/sharingan_1.png';
 
 const sharingan = {
     "sharingan": "/images/sharingan/sharingan_1.png" ,
-    "genjutsu": "/images/sharingan/sharingan_2.png" ,
-    "izanagi": "" ,
-    "kakashi of the sharingan": "" ,
+    "genjutsu": "/images/sharingan/sharingan_3.png" ,
+    "izanagi": "/images/sharingan/sharingan_2.png" ,
+    "kakashi of the sharingan": "/images/sharingan/sharingan_1.png" ,
     "izanami": "" ,
     "susanoo": "/images/sharingan/sharingan_6.png" ,
     "amaterasu": "/images/sharingan/sharingan_7.png" ,
     "kamui": "/images/sharingan/sharingan_4.png",
-    //"kamui": "/images/sharingan/kamui.png"
 }
 
 export const sharingan_keys = Object.keys(sharingan)
@@ -54,11 +53,9 @@ function findDistance(p1, p2) {
     return distance
 }
 
-export function addSharingan(jutsu, centerAxis, radius) {
-    let wh = Math.round(radius * 2)
+export function addSharingan(centerAxis, radius) {
+    let wh = Math.round(radius * 2);
     let axis = centerAxis.map(x => Math.round(x - radius));
-
-    mapSharingan(jutsu);
     ctx.drawImage(eyeImage, axis[0], axis[1], wh, wh)
 }
 
@@ -99,8 +96,10 @@ export function detect(jutsu, landmarks, img_w, img_h) {
 
     let minEyeDis = (l_radius * 1.5) * irisVisible
 
-    if (leftDis > minEyeDis) addSharingan(jutsu, center_left, (leftDis/1.75));
-    if (rightDis > minEyeDis) addSharingan(jutsu, center_right, (rightDis/1.75));
+    mapSharingan(jutsu);
+
+    if (leftDis > minEyeDis) addSharingan(center_left, (leftDis/2.0));
+    if (rightDis > minEyeDis) addSharingan(center_right, (rightDis/2.0));
 
     landmarksTensor.dispose()
 }

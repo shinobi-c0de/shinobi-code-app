@@ -116,6 +116,7 @@ video.addEventListener('play', () => {
                 if (Math.floor(Date.now() / 1000) - sign_start_time > timeout) {
                     sign_start_time = 0;
                     jutsu_start_time = 0;
+                    //For testing comment below line
                     //recordButton.click();
                 }
             }
