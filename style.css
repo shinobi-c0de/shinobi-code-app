@@ -192,16 +192,17 @@ main {
 }
 
 .video-container {
+  display: flex;
   position: relative;
-  width: 960px;
-  height: 540px;
+  width: 1280px;
+  height: 720px;
 }
 .button-container {
   /* Optional: Add styles to the child divs */
   margin-top: 10px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items:center;
 }
 
 .video {
@@ -215,7 +216,6 @@ main {
   position: absolute;
   object-fit: cover;
   border-radius: 15px;
-  border: 5px solid black;
   /*top: 0;
   left: 0;
   width: 100%;
