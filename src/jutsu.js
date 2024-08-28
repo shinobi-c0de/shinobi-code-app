@@ -1,6 +1,9 @@
 import jutsuData from './jutsu.json';
 
-
+let audio_base = new Audio();
+let audio_extra = new Audio();
+audio_base.volume = 0.5;
+//let Jutsu;
 // Jutsu function
 export async function getJutsu(signHistory,speechText) {
     let jutsu,res = [];
@@ -18,34 +21,58 @@ export async function getJutsu(signHistory,speechText) {
 
     for (let key in keys) {
         let data = keys[key];
-        if(jutsuData[data].handsign === handSigns) res.push(data);
+        if(jutsuData[data].handsign.includes(handSigns)) res.push(data);
     }
-    
+
     for (let i = 0; i < res.length; i++) {
         if( speechText === res[i]) jutsu = res[i];
     }
-    if (jutsu) await playJutsuSound(jutsu);
+    if (jutsu) playJutsuSound(jutsu);
     //jutsu = keys.find(key => jutsuData[key] === handSigns);
     return jutsu;
 }
 
+//Event handler to play audio unique to jutsu once base audio is finished
+/*audio_base.addEventListener('ended', () => {
+    switch (Jutsu) {
+        case "chidori": {
+            audio_extra.src = "audio/chidori.mp3";
+            audio_extra.play();
+            break;
+        }
+        case "genjutsu": {
+            audio_extra.src = "audio/sonosharingan.mp3";
+            audio_extra.play();
+            break;
+        }
+    }
+});*/
+
 async function playJutsuSound(jutsu) {
-    let audio = new Audio();
-    audio.volume = 0.5;
+    //Jutsu = jutsu;
 
     switch (jutsuData[jutsu].type) {
-
         case "jutsu": {
-            audio.src = "audio/jutsu.mp3"; 
-            audio.play();
+            audio_base.src = "audio/jutsu.mp3"; 
+            await audio_base.play();
             break;
         }
         case "sharingan": {
-            audio.src = "audio/sharingan.mp3"; 
-            audio.play();
+            audio_base.src = "audio/sharingan.mp3"; 
+            await audio_base.play();
             break;
         }
-        default: console.error("Jutsu is either undefined or not a valid type");
     }
-    
+    switch (jutsu) {
+        case "chidori": {
+            audio_extra.src = "audio/chidori.mp3";
+            audio_extra.play();
+            break;
+        }
+        case "genjutsu": {
+            audio_extra.src = "audio/sonosharingan.mp3";
+            audio_extra.play();
+            break;
+        }
+    }
 }

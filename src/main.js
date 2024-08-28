@@ -8,11 +8,9 @@ import { getJutsu } from "./jutsu";
 //import { deque, labels_En, labels_symbol, addLog, speech2Text, getJutsu } from './utils/utils';
 let model_path = "/models/yolox_nano_with_post.onnx";
 
-
 const video = document.getElementById("video");
 const recordButton = document.getElementById("record-button");
 const image = document.getElementById("image");
-let lang = document.getElementById("lang");
 
 const speechtextStatus = document.getElementById("speechtextStatus");
 
@@ -36,14 +34,15 @@ let audio = new Audio('audio/hand_sign.mp3');
 
 async function setup() {
     Session = await ort.InferenceSession.create(model_path);
-    console.log("Inference session created", Session);
+    if (Session) console.log("HandSign detection model loaded.");
 
     inputName = Session.inputNames[0];
     outputName = Session.outputNames[0];
 
     faceLandmarker = await createFaceLandmarker();
+    if (faceLandmarker) console.log("Iris detection model loaded.");
 
-    init().then(() => {console.log("Initialize done")});
+    init().then(() => {console.log("WASM Initialized.")});
 
     sign_display_queue = new deque(18);
     sign_history_queue = new deque(18);
@@ -64,12 +63,21 @@ document.addEventListener('DOMContentLoaded', async() => {
     canvas.width = video.width;
     canvas.height = video.height;
     console.log("Canvas Dims: ", canvas.width, canvas.height);
-    overlay.width = canvas.width;
-    overlay.height = canvas.height;
+
+    const mainContent = document.querySelector('.container');
+    if (mainContent) {
+        if (window.innerWidth < 1024) alert("Shinobi Code is only accessible on a laptop or desktop device.");
+        if (window.innerWidth >= 1024) {
+            // If screen width is less than 1024px (likely a mobile device), hide the webpage
+            if (mainContent) {
+                mainContent.style.display = 'flex'
+            }
+        }
+    }
+    
 
     await setup();
 })
-
 
 video.addEventListener('play', () => {
 

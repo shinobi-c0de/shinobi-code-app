@@ -1,6 +1,7 @@
 import { Deque } from 'data-structure-typed';
 import * as wanakana from 'wanakana'
 import * as vision from '@mediapipe/tasks-vision'
+import jutsuData from './jutsu.json';
 
 const { FaceLandmarker, FilesetResolver, DrawingUtils } = vision;
 
@@ -131,26 +132,7 @@ export async function speech2Text(audioBlob) {
 
   let transcript, speechText;
 
-  const jutsuList = [
-      "shadow clone jutsu",
-      "summoning jutsu",
-      "reanimation jutsu",
-      "release",
-      "fire release fireball jutsu",
-      "chidori",
-      "sage mode",
-      "almighty push",
-      "universal pull",
-      "planetary devastation",
-      "sharingan",
-      "genjutsu",
-      "izanagi",
-      "kakashi of the sharingan",
-      "izanami",
-      "susanoo",
-      "amaterasu",
-      "kamui"
-  ];
+  const jutsuList = Object.keys(jutsuData);
 
   try {
     transcript = await speech2TextAPI(audioBlob)
@@ -169,15 +151,15 @@ export async function speech2Text(audioBlob) {
   }
 
   if (!jutsuList.includes(speechText)) {
-    speechtextStatus.textContent = "Speech recognition error: Stop recording and please try again!"
-    console.error(`Speech recognition error: You said, ${speechText}`)
+    speechtextStatus.textContent = `Speech recognition error: Stop recording and please try again!`
+    console.error(`Speech recognition error: You said, "${speechText}"`)
     speechText = null
   }
 
   const isJapanese = wanakana.isJapanese(speechText);
   if (isJapanese) {
     speechtextStatus.textContent = "Speech recognition error: Stop recording and please try again!"
-    console.error(`Speech recognition error: You said, ${speechText}`)
+    console.error(`Speech recognition error: SpeechText returned without translation, "${speechText}"`)
     speechText = null
   }
 
