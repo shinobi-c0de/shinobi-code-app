@@ -1,12 +1,12 @@
 @font-face {
   font-family: 'KouzanMouhitu';
-  src: url('font/KouzanMouhitu.ttf');
+  src: url('/font/KouzanMouhitu.ttf');
   font-style: normal;
 }
 
 @font-face {
 font-family: 'NJNaruto';
-src: url('font/njnaruto.ttf');
+src: url('/font/njnaruto.ttf');
 font-style: normal;
 }
 
