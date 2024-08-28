@@ -221,7 +221,7 @@ async function processFrame() {
     }
 
     if (outputData.length != 0) {
-        let output = await postprocess(outputData, results[outputName].dims, ratio, 960,540)
+        let output = await postprocess(outputData, results[outputName].dims, ratio, canvas.width,canvas.height)
         let label = renderBox(output)
 
         if (label) {
