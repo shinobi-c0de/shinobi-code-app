@@ -284,14 +284,37 @@ function renderBox(output) {
     let y1 = Math.floor(bbox[1]);
     let x2 = Math.floor(bbox[2]);
     let y2 = Math.floor(bbox[3]);
-    let fontSize = 100;
+
+    let x_len = x2 - x1
+    let y_len = y2 - y1
+    let square_len = x_len >= y_len ? x_len : y_len;
+    let square_x1 = Math.floor(((x1 + x2) / 2) - (square_len / 2))
+    let square_y1 = Math.floor(((y1 + y2) / 2) - (square_len / 2))
+    let square_x2 = square_x1 + square_len
+    let square_y2 = square_y1 + square_len
+
+    let font_size = Math.floor(square_len / 2)
 
     // Draw the rectangle
-    ctx.strokeStyle = 'red';
+    /*ctx.strokeStyle = 'red';
     ctx.lineWidth = 5;
     ctx.beginPath();
     ctx.rect(x1, y1, x2 - x1, y2 - y1);
-    ctx.stroke();
+    ctx.stroke();*/
+
+    // Calculate the width and height of the rectangle
+    const width = square_x2 - square_x1;
+    const height = square_y2 - square_y1;
+
+    // Draw the first rectangle (white border with 4px thickness)
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = 'white';
+    ctx.strokeRect(square_x1, square_y1, width, height);
+
+    // Draw the second rectangle (black border with 2px thickness inside the white border)
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgb(0, 0, 0)';
+    ctx.strokeRect(square_x1, square_y1, width, height);
 
     /*ctx.strokeStyle = 'rgb(0, 255, 0)'; // Green color
     ctx.lineWidth = 2;
@@ -301,13 +324,13 @@ function renderBox(output) {
 
     // Add class label (optional)
     if (classId) {
-        ctx.font = '20px Arial';
+        /*ctx.font = '20px Arial';
         ctx.fillStyle = 'white';
-        ctx.fillText(`ID: ${classId}, ${labels_En[classId]}, ${score.toFixed(2)}`, x1, y1-10);
+        ctx.fillText(`ID: ${classId}, ${labels_En[classId]}, ${score.toFixed(2)}`, x1, y1-10);*/
 
-        ctx.font = '100px KouzanMouhitu'; //KouzanMouhitu
-        ctx.fillStyle = 'white';
-        ctx.fillText(labels_symbol[classId], x2-(fontSize+10), y2-(fontSize/4));
+        ctx.font = `${font_size}px KouzanMouhitu`; //KouzanMouhitu
+        ctx.fillStyle = 'rgb(185, 0, 0)';
+        ctx.fillText(labels_symbol[classId], square_x2-font_size, square_y2-(Math.floor(font_size/4)));
 
     }
 
