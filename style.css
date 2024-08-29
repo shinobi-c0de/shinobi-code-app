@@ -153,7 +153,10 @@ main {
 .custom-block-title {
   font-weight: 600;
 }
-.info a:hover {
+.custom-block a {
+  font-weight: 600;
+}
+.custom-block a:hover {
   color: #D35400;
 }
 
