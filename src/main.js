@@ -35,6 +35,7 @@ let jutsu_display_time, jutsu_start_time, jutsu_display;
 let audio = new Audio('audio/hand_sign.mp3');
 
 async function setup() {
+    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
     Session = await ort.InferenceSession.create(model_path);
     if (Session) console.log("HandSign detection model loaded.");
 
