@@ -19,7 +19,7 @@
     "@mediapipe/tasks-vision": "^0.10.15",
     "@tensorflow/tfjs": "^4.21.0",
     "data-structure-typed": "^1.52.3",
-    "onnxruntime-web": "^1.19.2",
+    "onnxruntime-web": "1.18.0",
     "smallest-enclosing-circle": "^1.0.2",
     "wanakana": "^5.3.1"
   },
