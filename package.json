@@ -9,17 +9,17 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^5.3.4",
+    "vite": "^5.4.3",
     "vite-plugin-commonjs": "^0.10.1",
     "vite-plugin-static-copy": "^1.0.6",
-    "vite-plugin-top-level-await": "^1.4.2",
+    "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.3.0"
   },
   "dependencies": {
-    "@mediapipe/tasks-vision": "^0.10.14",
-    "@tensorflow/tfjs": "^4.20.0",
-    "data-structure-typed": "^1.52.0",
-    "onnxruntime-web": "^1.18.0",
+    "@mediapipe/tasks-vision": "^0.10.15",
+    "@tensorflow/tfjs": "^4.21.0",
+    "data-structure-typed": "^1.52.3",
+    "onnxruntime-web": "^1.19.2",
     "smallest-enclosing-circle": "^1.0.2",
     "wanakana": "^5.3.1"
   },
