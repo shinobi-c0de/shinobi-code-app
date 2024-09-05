@@ -1,6 +1,17 @@
 import * as tf from '@tensorflow/tfjs'
 import SmallestEnclosingCircle from 'smallest-enclosing-circle'
 
+//Sharingan Images
+import Sharingan from '/images/sharingan/sharingan_1.png'
+import Itachi1 from '/images/sharingan/sharingan_3.png'
+import Itachi2 from '/images/sharingan/sharingan_2.png'
+import Kakashi from '/images/sharingan/sharingan_1.png'
+import Izanami from '/images/sharingan/sharingan_1.png'
+import Madara from '/images/sharingan/sharingan_6.png'
+import Sasuke from '/images/sharingan/sharingan_7.png'
+import Obito from '/images/sharingan/sharingan_4.png'
+
+
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
@@ -8,14 +19,14 @@ const eyeImage = new Image();
 eyeImage.src = '/images/sharingan/sharingan_1.png';
 
 const sharingan = {
-    "sharingan": "/images/sharingan/sharingan_1.png" ,
-    "genjutsu": "/images/sharingan/sharingan_3.png" ,
-    "izanagi": "/images/sharingan/sharingan_2.png" ,
-    "kakashi of the sharingan": "/images/sharingan/sharingan_1.png" ,
-    "izanami": "" ,
-    "susanoo": "/images/sharingan/sharingan_6.png" ,
-    "amaterasu": "/images/sharingan/sharingan_7.png" ,
-    "kamui": "/images/sharingan/sharingan_4.png",
+    "sharingan": Sharingan,
+    "genjutsu": Itachi1,
+    "izanagi": Itachi2,
+    "kakashi of the sharingan": Kakashi,
+    "izanami": Izanami ,
+    "susanoo": Madara,
+    "amaterasu": Sasuke,
+    "kamui": Obito,
 }
 
 export const sharingan_keys = Object.keys(sharingan)
@@ -98,9 +109,9 @@ export function detect(jutsu, landmarks, img_w, img_h) {
 
     mapSharingan(jutsu);
 
-    if (leftDis > minEyeDis) addSharingan(center_left, (leftDis/2.0));
-    if (rightDis > minEyeDis) addSharingan(center_right, (rightDis/2.0));
-
+    if (leftDis > minEyeDis) addSharingan(center_left, (leftDis/1.75));
+    if (rightDis > minEyeDis) addSharingan(center_right, (rightDis/1.75));
+    
     landmarksTensor.dispose()
 }
 

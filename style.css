@@ -10,7 +10,6 @@ src: url('/font/njnaruto.ttf');
 font-style: normal;
 }
 
-
 body {
   display: flex;
   flex-direction: column;
@@ -24,7 +23,7 @@ body {
   color: rgba(60, 60, 67);/*rgba(255, 255, 245, 0.86)*/;
   background-color: #E5E4E2/*#1b1b1f*/;
   font-synthesis: style;
-  font-family: sans-serif;
+  font-family: "Inter", sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -151,10 +150,10 @@ main {
   background-color: rgba(142, 150, 170, 0.14);
 }
 .custom-block-title {
-  font-weight: 600;
+  font-weight: 700;
 }
 .custom-block a {
-  font-weight: 600;
+  font-weight: 700;
 }
 .custom-block a:hover {
   color: #D35400;
@@ -199,6 +198,7 @@ main {
   position: relative;
   width: 1280px;
   height: 720px;
+  font-family: 'KouzanMouhitu';
 }
 .button-container {
   /* Optional: Add styles to the child divs */
@@ -276,6 +276,12 @@ main {
   }
 }
 
+.jutsuHelp {
+  font-size: 20px;
+}
+.handsigns {
+  font-family: 'NJNaruto';
+}
 
 /*Diagnostics*/
 summary {

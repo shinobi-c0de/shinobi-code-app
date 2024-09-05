@@ -129,10 +129,10 @@ export function addLog(message) {
 }
 
 export async function speech2Text(audioBlob) {
-
   let transcript, speechText;
-
   const jutsuList = Object.keys(jutsuData);
+
+  speechtextStatus.textContent = "Transcribing... Please Wait";
 
   try {
     transcript = await speech2TextAPI(audioBlob)

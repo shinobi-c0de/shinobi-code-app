@@ -1,18 +1,20 @@
 import * as ort from "onnxruntime-web"
 import init, {preprocess,postprocess} from "./pkg"
-import { deque, labels_En, labels_symbol, speech2Text, createFaceLandmarker } from "./utils";
+import { deque,labels_En,labels_symbol,createFaceLandmarker,speech2Text } from "./utils";
 import { sharingan_keys, detect } from "./iris";
-import { getJutsu } from "./jutsu";
+import { getJutsu,jutsuHelper } from "./jutsu";
 
 
 //import { deque, labels_En, labels_symbol, addLog, speech2Text, getJutsu } from './utils/utils';
 let model_path = "/models/yolox_nano_with_post.onnx";
 
 const video = document.getElementById("video");
-const recordButton = document.getElementById("record-button");
+const recordButton = document.getElementById("recordButton");
 const image = document.getElementById("image");
 
 const speechtextStatus = document.getElementById("speechtextStatus");
+const jutsuHelp = document.getElementById("jutsuHelp");
+const handSigns = document.getElementById("handSigns");
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
@@ -44,8 +46,8 @@ async function setup() {
 
     init().then(() => {console.log("WASM Initialized.")});
 
-    sign_display_queue = new deque(18);
-    sign_history_queue = new deque(18);
+    sign_display_queue = new deque(15);
+    sign_history_queue = new deque(15);
 
     record_interval = 3;
     sign_interval = 3;
@@ -62,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async() => {
     //Set canvas dimensions
     canvas.width = video.width;
     canvas.height = video.height;
-    console.log("Canvas Dims: ", canvas.width, canvas.height);
+    //console.log("Canvas Dims: ", canvas.width, canvas.height);
 
     const mainContent = document.querySelector('.container');
     if (mainContent) {
@@ -161,6 +163,8 @@ recordButton.addEventListener("click", async () => {
         jutsu = '';
         Jutsu = '';
         speechtextStatus.textContent = "";
+        jutsuHelp.textContent = "";
+        handSigns.textContent = "";
     }
 });
 
@@ -181,9 +185,17 @@ navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true
         audioBlob = new Blob(audioChunks , { type: 'audio/wav'});
         audioChunks = [];
         speechText = await speech2Text(audioBlob);
-        if (speechText != null) speechtextStatus.textContent = `You said : ${speechText}`;
-        //addLog(`Speech Engine detected: ${speechText}`);
-        console.log("Speech Text: ", speechText);
+        if (speechText != null) {
+            speechtextStatus.textContent = `You said : ${speechText}`;
+            //addLog(`Speech Engine detected: ${speechText}`);
+            //console.log("Speech Text: ", speechText);
+
+            let handsigns_display = jutsuHelper(speechText);
+            jutsuHelp.textContent = `Hand Signs for ${speechText}: `;
+            handSigns.textContent = ` ${handsigns_display}`;
+            jutsuHelp.appendChild(handSigns);
+            handsigns_display = "";
+        }
     }
     
 
@@ -249,7 +261,7 @@ async function processFrame() {
                         }
                         Jutsu = Jutsu.join(" ");
 
-                        console.log("Jutsu: ", Jutsu);
+                        //console.log("Jutsu: ", Jutsu);
                         jutsu_display = Jutsu;
                         //addLog(`Jutsu: ${jutsu_display}`);
                         jutsu_start_time = Math.floor(Date.now() / 1000);
