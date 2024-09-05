@@ -3,7 +3,6 @@ import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 
 export default defineConfig({
-  optimizeDeps: { exclude: ["pyodide"] },
   plugins: [
     wasm(),
     topLevelAwait(),
@@ -15,7 +14,4 @@ export default defineConfig({
       'Access-Control-Allow-Origin' : '*'
     }
   },
-  build: {
-    commonjsOptions: { transformMixedEsModules: true } // Change
-  }
 });
