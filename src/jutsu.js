@@ -76,3 +76,14 @@ async function playJutsuSound(jutsu) {
         }
     }
 }
+
+export function jutsuHelper(speechtext) {
+    let handsigns;
+    if (speechtext == "chidori") handsigns = jutsuData[speechtext].handsign[1];
+    else handsigns= jutsuData[speechtext].handsign[0];
+  
+    handsigns = handsigns.split(' ')
+    let handsigns_display = handsigns.join(" -> ")
+  
+    return handsigns_display
+  }

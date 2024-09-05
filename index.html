@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shinobi Web</title>
     <link rel="icon" href="images/shinobi-light.png" type="image/x-icon">
+    <link rel="preload" href="/font/KouzanMouhitu.ttf" as="font" type="font/ttf" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
 </head>
 <body>
     <header class="nav">
@@ -50,13 +51,18 @@
                 <canvas class="canvas" id="canvas"></canvas>
                 <canvas class="overlay" id="overlay"></canvas>
             </div>
-            <div>
+
+            <div class="speechtextStatus">
                 <p id="speechtextStatus"></p>
-                <p id="label"></p>
+            </div>
+            <div class="jutsuHelp">
+                <p id="jutsuHelp">
+                    <span id="handSigns" class="handsigns"></span>
+                </p>
             </div>
 
             <div class="button-container">
-                <button type="image" class="rec-button" id="record-button" title="Record Jutsu">
+                <button type="image" class="rec-button" id="recordButton" title="Record Jutsu">
                     <img id="image" src="images/shinobi-dark.png" alt="Record Button">
                 </button>
             </div>
