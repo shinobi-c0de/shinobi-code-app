@@ -3,9 +3,9 @@ import init, {preprocess,postprocess} from "./pkg"
 import { deque,labels_En,labels_symbol,createFaceLandmarker,speech2Text } from "./utils";
 import { sharingan_keys, detect } from "./iris";
 import { getJutsu,jutsuHelper } from "./jutsu";
-
-
 //import { deque, labels_En, labels_symbol, addLog, speech2Text, getJutsu } from './utils/utils';
+
+
 let model_path = "/models/yolox_nano_with_post.onnx";
 
 const video = document.getElementById("video");
@@ -55,7 +55,7 @@ async function setup() {
     jutsu_display_time = 3;
     sign_start_time = 0;
     jutsu_start_time = 0;
-    timeout = 15;
+    timeout = 30;
     sign_display = '';
     jutsu_display = '';
 
@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', async() => {
         }
     }
     
-
     await setup();
 })
 
@@ -127,8 +126,8 @@ video.addEventListener('play', () => {
                 if (Math.floor(Date.now() / 1000) - sign_start_time > timeout) {
                     sign_start_time = 0;
                     jutsu_start_time = 0;
-                    //For testing comment below line
-                    //recordButton.click();
+                    //When testing, comment below line
+                    recordButton.click();
                 }
             }
         }
