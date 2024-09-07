@@ -62,6 +62,11 @@ async function playJutsuSound(jutsu) {
             await audio_base.play();
             break;
         }
+        case "rinnegan": {
+            audio_base.src = "audio/jutsu.mp3"; 
+            await audio_base.play();
+            break;
+        }
     }
     switch (jutsu) {
         case "chidori": {

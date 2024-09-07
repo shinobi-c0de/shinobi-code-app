@@ -12,8 +12,8 @@ import Sasuke from '/images/sharingan/sharingan_7.png'
 import Obito from '/images/sharingan/sharingan_4.png'
 
 
-const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d')
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 
 const eyeImage = new Image();
 eyeImage.src = '/images/sharingan/sharingan_1.png';
@@ -23,7 +23,7 @@ const sharingan = {
     "genjutsu": Itachi1,
     "izanagi": Itachi2,
     "kakashi of the sharingan": Kakashi,
-    "izanami": Izanami ,
+    "izanami": Izanami,
     "susanoo": Madara,
     "amaterasu": Sasuke,
     "kamui": Obito,
