@@ -3,10 +3,6 @@ import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 
 export default defineConfig({
-  plugins: [
-    wasm(),
-    topLevelAwait(),
-  ],
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
@@ -14,4 +10,8 @@ export default defineConfig({
       'Access-Control-Allow-Origin' : '*'
     }
   },
+  plugins: [
+    wasm(),
+    topLevelAwait(),
+  ],
 });
