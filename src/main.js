@@ -8,6 +8,8 @@ import { getJutsu,jutsuHelper } from "./jutsu";
 
 let model_path = "/models/yolox_nano_with_post.onnx";
 
+const optionsButton = document.getElementById("optionsButton");
+
 const video = document.getElementById("video");
 const recordButton = document.getElementById("recordButton");
 const image = document.getElementById("image");
@@ -19,7 +21,7 @@ const handSigns = document.getElementById("handSigns");
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
-let isRecording;
+let isRecording, isActive;
 let Session, inputName, outputName;
 let speechText, timeout, jutsu, Jutsu;
 
@@ -61,6 +63,10 @@ async function setup() {
 
 }
 
+function isLaptop() {
+    return window.innerWidth >= 1024; // Adjust the width as needed
+}
+
 document.addEventListener('DOMContentLoaded', async() => {
     //Set canvas dimensions
     canvas.width = video.width;
@@ -69,13 +75,10 @@ document.addEventListener('DOMContentLoaded', async() => {
 
     const mainContent = document.querySelector('.container');
     if (mainContent) {
-        if (window.innerWidth < 1024) alert("Shinobi Code is only accessible on a laptop or desktop device.");
-        if (window.innerWidth >= 1024) {
-            // If screen width is less than 1024px (likely a mobile device), hide the webpage
-            if (mainContent) {
-                mainContent.style.display = 'flex'
-            }
+        if (isLaptop()) {
+            mainContent.style.display = 'flex'
         }
+        else alert("Shinobi Code is only accessible on a laptop or desktop device.");
     }
     
     await setup();
@@ -138,6 +141,16 @@ video.addEventListener('play', () => {
    draw();
 });
 
+optionsButton.addEventListener("click", () => {
+    if (!isActive) {
+        isActive = true;
+        optionsButton.classList.add('active');
+    }
+    else {
+        isActive = false;
+        optionsButton.classList.remove('active');
+    }
+})
 
 recordButton.addEventListener("click", async () => {
     if (!isRecording) {
@@ -170,39 +183,38 @@ recordButton.addEventListener("click", async () => {
 
 let recorder, audioBlob, audioChunks = [];
 
-navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }) 
-.then(stream => {
-    const videoStream = new MediaStream(stream.getVideoTracks());
-    video.srcObject = videoStream;
-    video.play();
+if (isLaptop()) {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }) 
+    .then(stream => {
+        const videoStream = new MediaStream(stream.getVideoTracks());
+        video.srcObject = videoStream;
+        video.play();
 
-    const audioStream = new MediaStream(stream.getAudioTracks());
-    recorder = new MediaRecorder(audioStream);
-    recorder.ondataavailable = (event) => {
-        audioChunks.push(event.data);
-    }
-    recorder.onstop = async() => {
-        audioBlob = new Blob(audioChunks , { type: 'audio/wav'});
-        audioChunks = [];
-        speechText = await speech2Text(audioBlob);
-        if (speechText != null) {
-            speechtextStatus.textContent = `You said : ${speechText}`;
-            //addLog(`Speech Engine detected: ${speechText}`);
-            //console.log("Speech Text: ", speechText);
-
-            let handsigns_display = jutsuHelper(speechText);
-            jutsuHelp.textContent = `Hand Signs for ${speechText}: `;
-            handSigns.textContent = ` ${handsigns_display}`;
-            jutsuHelp.appendChild(handSigns);
-            handsigns_display = "";
+        const audioStream = new MediaStream(stream.getAudioTracks());
+        recorder = new MediaRecorder(audioStream);
+        recorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
         }
-    }
-    
+        recorder.onstop = async() => {
+            audioBlob = new Blob(audioChunks , { type: 'audio/wav'});
+            audioChunks = [];
+            speechText = await speech2Text(audioBlob);
+            if (speechText != null) {
+                speechtextStatus.textContent = `You said : ${speechText}`;
+                //addLog(`Speech Engine detected: ${speechText}`);
+                //console.log("Speech Text: ", speechText);
 
-}).catch (err => {
-    console.error('Error accessing user-facing camera:', err);
-});
-
+                let handsigns_display = jutsuHelper(speechText);
+                jutsuHelp.textContent = `Hand Signs for ${speechText}: `;
+                handSigns.textContent = ` ${handsigns_display}`;
+                jutsuHelp.appendChild(handSigns);
+                handsigns_display = "";
+            }
+        }
+    }).catch (err => {
+        console.error('Error accessing user-facing camera:', err);
+    });
+}
 
 async function processFrame() {
 
