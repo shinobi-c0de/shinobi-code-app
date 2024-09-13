@@ -1,8 +1,8 @@
 import * as ort from "onnxruntime-web"
-import init, {preprocess,postprocess} from "./pkg"
-import { deque,labels_En,labels_symbol,createFaceLandmarker,speech2Text } from "./utils";
+import init, {preprocess, postprocess} from "./pkg"
+import { deque, labels_En, labels_symbol, createFaceLandmarker, speech2Text } from "./utils";
 import { sharingan_keys, detect } from "./iris";
-import { getJutsu,jutsuHelper } from "./jutsu";
+import { getJutsu, jutsuHelper, sendJutsu } from "./jutsu";
 //import { deque, labels_En, labels_symbol, addLog, speech2Text, getJutsu } from './utils/utils';
 
 
@@ -277,6 +277,14 @@ async function processFrame() {
                         jutsu_display = Jutsu;
                         //addLog(`Jutsu: ${jutsu_display}`);
                         jutsu_start_time = Math.floor(Date.now() / 1000);
+                        
+                        //Send jutsu to server
+                        if (import.meta.env.VITE_Mode === 'App') {
+                            const jutsuData = {
+                                jutsu: jutsu,
+                            };
+                            await sendJutsu(jutsuData);
+                        }
                     }
                 }
             }
