@@ -10,11 +10,16 @@ src: url('/font/njnaruto.ttf');
 font-style: normal;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
 body {
   display: flex;
   flex-direction: column;
-  margin: 0;
-  width: 100%;
+  transform: scale(0.8);
+  transform-origin: top left;
+  width: 125%;
   min-width: 320px;
   min-height: 100vh;
   line-height: 24px;
