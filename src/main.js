@@ -21,7 +21,7 @@ const handSigns = document.getElementById("handSigns");
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
-let Mode;
+let Mode, Port;
 let isRecording, isActive;
 let Session, inputName, outputName;
 let speechText, timeout, jutsu, Jutsu;
@@ -75,6 +75,8 @@ document.addEventListener('DOMContentLoaded', async() => {
     //console.log("Canvas Dims: ", canvas.width, canvas.height);
     
     Mode = import.meta.env.VITE_Mode;
+    Port = import.meta.env.VITE_Port;
+
     const mainContent = document.querySelector('.container');
 
     if (mainContent) {
@@ -87,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             let data = '';
 
             try {
-                let response = await fetch('http://localhost:8080/');
+                let response = await fetch(`http://localhost:${Port}/`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -305,7 +307,7 @@ async function processFrame() {
                             const jutsuData = {
                                 jutsu: jutsu,
                             };
-                            await sendJutsu(jutsuData);
+                            await sendJutsu(jutsuData, Port);
                         }
                     }
                 }

@@ -94,11 +94,11 @@ export function jutsuHelper(speechtext) {
   }
 
 //To send data to VS Code
-export async function sendJutsu(data) {
+export async function sendJutsu(data, Port) {
     const Data = JSON.stringify(data);
 
     try {
-        const response = await fetch('http://localhost:8080/sendJutsu', {
+        const response = await fetch(`http://localhost:${Port}/sendJutsu`, {
             method: 'POST', // Can be GET, PUT, DELETE etc.
             body: Data,
             headers: { 'Content-Type': 'application/json' }, // Specify content type
