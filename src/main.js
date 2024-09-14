@@ -21,6 +21,7 @@ const handSigns = document.getElementById("handSigns");
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
+let Mode;
 let isRecording, isActive;
 let Session, inputName, outputName;
 let speechText, timeout, jutsu, Jutsu;
@@ -72,13 +73,34 @@ document.addEventListener('DOMContentLoaded', async() => {
     canvas.width = video.width;
     canvas.height = video.height;
     //console.log("Canvas Dims: ", canvas.width, canvas.height);
-
+    
+    Mode = import.meta.env.VITE_Mode;
     const mainContent = document.querySelector('.container');
+
     if (mainContent) {
         if (isLaptop()) {
             mainContent.style.display = 'flex'
         }
         else alert("Shinobi Code is only accessible on a laptop or desktop device.");
+
+        if (Mode == 'App') {
+            let data = '';
+
+            try {
+                let response = await fetch('http://localhost:8080/');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                data = await response.json();
+            } catch (error) {
+                console.error(error);
+            }
+            if ( data.message != 'shinobi-code-extension') {
+                mainContent.style.display = 'none';
+                alert("Looks like you are not using the Shinobi Code Extension. Click OK to Redirect to Demo website.");
+                window.location.href = "https://demo.shinobi-code.com/";
+            }
+        }
     }
     
     await setup();
@@ -279,7 +301,7 @@ async function processFrame() {
                         jutsu_start_time = Math.floor(Date.now() / 1000);
                         
                         //Send jutsu to server
-                        if (import.meta.env.VITE_Mode === 'App') {
+                        if (Mode == 'App') {
                             const jutsuData = {
                                 jutsu: jutsu,
                             };
