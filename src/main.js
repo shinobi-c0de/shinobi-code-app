@@ -22,7 +22,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
 let Mode, Port;
-let isRecording, isActive;
+let isSetupDone, isRecording, isActive;
 let Session, inputName, outputName;
 let speechText, timeout, jutsu, Jutsu;
 
@@ -38,6 +38,38 @@ let jutsu_display_time, jutsu_start_time, jutsu_display;
 let audio = new Audio('audio/hand_sign.mp3');
 
 async function setup() {
+    Mode = import.meta.env.VITE_Mode;
+    Port = import.meta.env.VITE_Port;
+
+    const mainContent = document.querySelector('.container');
+    if (window.innerWidth >= 1024) {
+        mainContent.style.display = 'flex'; // Display Main content
+
+        if (Mode == 'App') { // Check if https://app.shinobi-code.com is accessed from only extension
+            let data = '';
+
+            try {
+                let response = await fetch(`http://localhost:${Port}/`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                data = await response.json();
+            } catch (error) {
+                console.error(error);
+            }
+            if ( data.message != 'shinobi-code-extension') {
+                mainContent.style.display = 'none';
+                alert("Looks like you are not using the Shinobi Code Extension. Click OK to Redirect to Demo website.");
+                window.location.href = "https://demo.shinobi-code.com/";
+            }
+        }
+    }
+    else {
+        alert("Shinobi Code is only accessible on a laptop or desktop device.");
+        return;
+    }
+
+
     ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/';
     Session = await ort.InferenceSession.create(model_path, {executionProviders: ['cpu']});
     if (Session) console.log("HandSign detection model loaded.");
@@ -62,10 +94,8 @@ async function setup() {
     sign_display = '';
     jutsu_display = '';
 
-}
+    isSetupDone = true;
 
-function isLaptop() {
-    return window.innerWidth >= 1024; // Adjust the width as needed
 }
 
 document.addEventListener('DOMContentLoaded', async() => {
@@ -73,37 +103,6 @@ document.addEventListener('DOMContentLoaded', async() => {
     canvas.width = video.width;
     canvas.height = video.height;
     //console.log("Canvas Dims: ", canvas.width, canvas.height);
-    
-    Mode = import.meta.env.VITE_Mode;
-    Port = import.meta.env.VITE_Port;
-
-    const mainContent = document.querySelector('.container');
-
-    if (mainContent) {
-        if (isLaptop()) {
-            mainContent.style.display = 'flex'
-        }
-        else alert("Shinobi Code is only accessible on a laptop or desktop device.");
-
-        if (Mode == 'App') {
-            let data = '';
-
-            try {
-                let response = await fetch(`http://localhost:${Port}/`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                data = await response.json();
-            } catch (error) {
-                console.error(error);
-            }
-            if ( data.message != 'shinobi-code-extension') {
-                mainContent.style.display = 'none';
-                alert("Looks like you are not using the Shinobi Code Extension. Click OK to Redirect to Demo website.");
-                window.location.href = "https://demo.shinobi-code.com/";
-            }
-        }
-    }
     
     await setup();
 })
@@ -207,7 +206,7 @@ recordButton.addEventListener("click", async () => {
 
 let recorder, audioBlob, audioChunks = [];
 
-if (isLaptop()) {
+if (isSetupDone) {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }) 
     .then(stream => {
         const videoStream = new MediaStream(stream.getVideoTracks());
