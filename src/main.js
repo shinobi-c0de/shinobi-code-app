@@ -22,7 +22,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
 let Mode, Port;
-let isSetupDone, isRecording, isActive;
+let isRecording, isActive;
 let Session, inputName, outputName;
 let speechText, timeout, jutsu, Jutsu;
 
@@ -93,8 +93,6 @@ async function setup() {
     timeout = 30;
     sign_display = '';
     jutsu_display = '';
-
-    isSetupDone = true;
 
 }
 
@@ -206,38 +204,36 @@ recordButton.addEventListener("click", async () => {
 
 let recorder, audioBlob, audioChunks = [];
 
-if (isSetupDone) {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }) 
-    .then(stream => {
-        const videoStream = new MediaStream(stream.getVideoTracks());
-        video.srcObject = videoStream;
-        video.play();
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }) 
+.then(stream => {
+    const videoStream = new MediaStream(stream.getVideoTracks());
+    video.srcObject = videoStream;
+    video.play();
 
-        const audioStream = new MediaStream(stream.getAudioTracks());
-        recorder = new MediaRecorder(audioStream);
-        recorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-        }
-        recorder.onstop = async() => {
-            audioBlob = new Blob(audioChunks , { type: 'audio/wav'});
-            audioChunks = [];
-            speechText = await speech2Text(audioBlob);
-            if (speechText != null) {
-                speechtextStatus.textContent = `You said : ${speechText}`;
-                //addLog(`Speech Engine detected: ${speechText}`);
-                //console.log("Speech Text: ", speechText);
+    const audioStream = new MediaStream(stream.getAudioTracks());
+    recorder = new MediaRecorder(audioStream);
+    recorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+    }
+    recorder.onstop = async() => {
+        audioBlob = new Blob(audioChunks , { type: 'audio/wav'});
+        audioChunks = [];
+        speechText = await speech2Text(audioBlob);
+        if (speechText != null) {
+            speechtextStatus.textContent = `You said : ${speechText}`;
+            //addLog(`Speech Engine detected: ${speechText}`);
+            //console.log("Speech Text: ", speechText);
 
-                let handsigns_display = jutsuHelper(speechText);
-                jutsuHelp.textContent = `Hand Signs for ${speechText}: `;
-                handSigns.textContent = ` ${handsigns_display}`;
-                jutsuHelp.appendChild(handSigns);
-                handsigns_display = "";
-            }
+            let handsigns_display = jutsuHelper(speechText);
+            jutsuHelp.textContent = `Hand Signs for ${speechText}: `;
+            handSigns.textContent = ` ${handsigns_display}`;
+            jutsuHelp.appendChild(handSigns);
+            handsigns_display = "";
         }
-    }).catch (err => {
-        console.error('Error accessing user-facing camera:', err);
-    });
-}
+    }
+}).catch (err => {
+    console.error('Error accessing user-facing camera:', err);
+});
 
 async function processFrame() {
 
