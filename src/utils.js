@@ -101,8 +101,9 @@ export class deque {
 
 
 export async function createFaceLandmarker() {
+  try {
   const filesetResolver = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
   );
   let faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
     baseOptions: {
@@ -115,6 +116,9 @@ export async function createFaceLandmarker() {
   });
 
   return faceLandmarker;
+} catch (error) {
+  console.error("Error initializing FaceLandmarker:", error);
+}
 }
 
   
