@@ -21,7 +21,7 @@ const handSigns = document.getElementById("handSigns");
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
-let Mode, Port;
+let Mode, Message, Port;
 let isRecording, isActive;
 let Session, inputName, outputName;
 let speechText, timeout, jutsu, Jutsu;
@@ -38,30 +38,27 @@ let jutsu_display_time, jutsu_start_time, jutsu_display;
 let audio = new Audio('audio/hand_sign.mp3');
 
 async function setup() {
-    Mode = import.meta.env.VITE_Mode;
     Port = import.meta.env.VITE_Port;
+    Message = import.meta.env.VITE_Message;
 
     const mainContent = document.querySelector('.container');
     if (window.innerWidth >= 1024) {
         mainContent.style.display = 'flex'; // Display Main content
 
-        if (Mode == 'App') { // Check if https://app.shinobi-code.com is accessed from only extension
-            let data = '';
+        // Check if Jutsu data need to be send to extension
+        let data = '';
 
-            try {
-                let response = await fetch(`http://localhost:${Port}/`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                data = await response.json();
-            } catch (error) {
-                console.error(error);
+        try {
+            let response = await fetch(`http://localhost:${Port}/`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            if ( data.message != 'shinobi-code-extension') {
-                mainContent.style.display = 'none';
-                alert("Looks like you are not using the Shinobi Code Extension. Click OK to Redirect to Demo website.");
-                window.location.href = "https://demo.shinobi-code.com/";
-            }
+            data = await response.json();
+        } catch (error) {
+            console.error(error);
+        }
+        if ( data.message == Message) {
+            Mode = 'App';
         }
     }
     else {
