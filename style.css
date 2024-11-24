@@ -46,7 +46,8 @@ p {
 }
 
 main {
-  flex: 1;
+  flex: 1 0 auto;
+  min-height: calc(100vh - 100px);
 }
 
 .container {
