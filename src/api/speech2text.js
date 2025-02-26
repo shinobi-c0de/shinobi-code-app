@@ -38,13 +38,13 @@ export async function speech2Text(audioBlob) {
   }
 
 async function speech2TextAPI(audio) {
-  let endpoint = import.meta.env.VITE_Speech2TextAPI;
+  let endpoint = import.meta.env.VITE_ShinobiCodeAPI;
   
   try {
     const formData = new FormData();
     formData.append('file', audio, 'recording.wav');
 
-    const response = await fetch(`http://${endpoint}/api/speech2text`, {
+    const response = await fetch(`${endpoint}/api/speech2text`, {
         method: 'POST',
         body: formData
     });
