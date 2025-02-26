@@ -301,7 +301,7 @@ main {
   font-weight: bold;
   font-size: 18px;
 }*/
-#speechtextStatus {
+#StatusMsg {
   padding: 1rem;
   font-size: 20px;
 }

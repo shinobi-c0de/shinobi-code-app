@@ -1,8 +1,12 @@
 import * as ort from "onnxruntime-web"
 import init, {preprocess, postprocess} from "./pkg"
-import { deque, labels_En, labels_symbol, createFaceLandmarker, speech2Text } from "./utils";
-import { sharingan_keys, detect } from "./iris";
-import { getJutsu, jutsuHelper, sendJutsu } from "./jutsu";
+import {deque} from "./utils/deque";
+import {setupRecorder, startRecording, stopRecording} from "./utils/record";
+
+import { labels_En, labels_symbol } from "./constants";
+import { checkPort, createFaceLandmarker } from "./utils/utils";
+import { sharingan_keys, detect } from "./utils/iris";
+import { getJutsu, jutsuHelper, sendJutsu } from "./utils/jutsu";
 //import { deque, labels_En, labels_symbol, addLog, speech2Text, getJutsu } from './utils/utils';
 
 
@@ -14,7 +18,7 @@ const video = document.getElementById("video");
 const recordButton = document.getElementById("recordButton");
 const image = document.getElementById("image");
 
-const speechtextStatus = document.getElementById("speechtextStatus");
+const StatusMsg = document.getElementById("StatusMsg");
 const jutsuHelp = document.getElementById("jutsuHelp");
 const handSigns = document.getElementById("handSigns");
 
@@ -41,31 +45,22 @@ async function setup() {
     Port = import.meta.env.VITE_Port;
     Message = import.meta.env.VITE_Message;
 
+    setupRecorder();
+
     const mainContent = document.querySelector('.container');
     if (window.innerWidth >= 1024) {
         mainContent.style.display = 'flex'; // Display Main content
 
         // Check if Jutsu data need to be send to extension
-        let data = '';
+        Mode = await checkPort(Port, Message);
 
-        try {
-            let response = await fetch(`http://localhost:${Port}/`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            data = await response.json();
-        } catch (error) {
-            console.error(error);
-        }
-        if ( data.message == Message) {
-            Mode = 'App';
-        }
     }
     else {
         alert("Shinobi Code is only accessible on a laptop or desktop device.");
         return;
     }
 
+    StatusMsg.textContent = "Initializing models...";
 
     ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/';
     Session = await ort.InferenceSession.create(model_path, {executionProviders: ['cpu']});
@@ -79,6 +74,10 @@ async function setup() {
 
     init().then(() => {console.log("WASM Initialized.")});
 
+    if (Session && faceLandmarker) {
+        StatusMsg.textContent = "Ready to go! Click Record button";
+    }
+
     sign_display_queue = new deque(15);
     sign_history_queue = new deque(15);
 
@@ -91,6 +90,22 @@ async function setup() {
     sign_display = '';
     jutsu_display = '';
 
+}
+
+async function StopRecording() {
+    speechText = await stopRecording();
+    
+    if (speechText != null) {
+        StatusMsg.textContent = `You said : ${speechText}`;
+        //addLog(`Speech Engine detected: ${speechText}`);
+        //console.log("Speech Text: ", speechText);
+
+        let handsigns_display = jutsuHelper(speechText);
+        jutsuHelp.textContent = `Hand Signs for ${speechText}: `;
+        handSigns.textContent = ` ${handsigns_display}`;
+        jutsuHelp.appendChild(handSigns);
+        handsigns_display = "";
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async() => {
@@ -132,7 +147,7 @@ video.addEventListener('play', () => {
             }
 
             if ((Math.floor(Date.now() / 1000) - record_start_time) > record_interval) {
-                recorder.stop();
+                StopRecording();
             }
             if ((Math.floor(Date.now() / 1000) - sign_start_time) > sign_interval) {
                 sign_display_queue.clear();
@@ -178,8 +193,8 @@ recordButton.addEventListener("click", async () => {
         canvas.classList.add('rec-border');   
         speechText = "";
         if (!speechText) {
-            speechtextStatus.textContent = "Listening... Say a Jutsu name and do handsigns";
-            recorder.start();
+            StatusMsg.textContent = "Listening... Say a Jutsu name and do handsigns";
+            startRecording();
             record_start_time = Math.floor(Date.now() / 1000);
         }
     }
@@ -193,44 +208,12 @@ recordButton.addEventListener("click", async () => {
         jutsu_start_time = 0;
         jutsu = '';
         Jutsu = '';
-        speechtextStatus.textContent = "";
+        StatusMsg.textContent = "";
         jutsuHelp.textContent = "";
         handSigns.textContent = "";
     }
 });
 
-let recorder, audioBlob, audioChunks = [];
-
-navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }) 
-.then(stream => {
-    const videoStream = new MediaStream(stream.getVideoTracks());
-    video.srcObject = videoStream;
-    video.play();
-
-    const audioStream = new MediaStream(stream.getAudioTracks());
-    recorder = new MediaRecorder(audioStream);
-    recorder.ondataavailable = (event) => {
-        audioChunks.push(event.data);
-    }
-    recorder.onstop = async() => {
-        audioBlob = new Blob(audioChunks , { type: 'audio/wav'});
-        audioChunks = [];
-        speechText = await speech2Text(audioBlob);
-        if (speechText != null) {
-            speechtextStatus.textContent = `You said : ${speechText}`;
-            //addLog(`Speech Engine detected: ${speechText}`);
-            //console.log("Speech Text: ", speechText);
-
-            let handsigns_display = jutsuHelper(speechText);
-            jutsuHelp.textContent = `Hand Signs for ${speechText}: `;
-            handSigns.textContent = ` ${handsigns_display}`;
-            jutsuHelp.appendChild(handSigns);
-            handsigns_display = "";
-        }
-    }
-}).catch (err => {
-    console.error('Error accessing user-facing camera:', err);
-});
 
 async function processFrame() {
 
@@ -263,7 +246,7 @@ async function processFrame() {
     if (outputData.length != 0) {
         let output = await postprocess(outputData, results[outputName].dims, ratio, canvas.width,canvas.height)
         let label = renderBox(output)
-
+        
         if (label) {
             if (sign_display_queue.size() == 0 || sign_display_arr[sign_display_arr.length - 1] != label) {
                 audio.play();
@@ -272,10 +255,10 @@ async function processFrame() {
                 sign_history_queue.push(label);
                 sign_display_arr = sign_history_queue.toArray();
                 sign_start_time = Math.floor(Date.now() / 1000);  
-
+                
                 if (sign_display_queue.size() > 0) {
                     sign_display = sign_display_arr.join(" -> ");
-
+                    
                     //Speechtext is available and jutsu is not evaluated
                     if (speechText && !jutsu) {
                         jutsu = await getJutsu(sign_history_queue, speechText);
