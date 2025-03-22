@@ -2,14 +2,14 @@ import * as tf from '@tensorflow/tfjs'
 import SmallestEnclosingCircle from 'smallest-enclosing-circle'
 
 //Sharingan Images
-import Sharingan from '/images/sharingan/sharingan_1.png'
-import Itachi1 from '/images/sharingan/sharingan_3.png'
-import Itachi2 from '/images/sharingan/sharingan_2.png'
-import Kakashi from '/images/sharingan/sharingan_1.png'
-import Izanami from '/images/sharingan/sharingan_1.png'
-import Madara from '/images/sharingan/sharingan_6.png'
-import Sasuke from '/images/sharingan/sharingan_7.png'
-import Obito from '/images/sharingan/sharingan_4.png'
+const Sharingan = '/images/sharingan/sharingan_1.png'
+const Itachi1 = '/images/sharingan/sharingan_3.png'
+const Itachi2 = '/images/sharingan/sharingan_2.png'
+const Kakashi = '/images/sharingan/sharingan_1.png'
+const Izanami = '/images/sharingan/sharingan_1.png'
+const Madara = '/images/sharingan/sharingan_6.png'
+const Sasuke = '/images/sharingan/sharingan_7.png'
+const Obito = '/images/sharingan/sharingan_4.png'
 
 
 const canvas = document.getElementById('canvas');

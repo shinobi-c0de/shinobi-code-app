@@ -172,17 +172,17 @@ main {
   background-color: #1b1b1f;
 }
 .Footer a {
-  text-decoration-line: underline;
+  text-decoration-line: none;
   text-underline-offset: 2px;
   transition: color 0.25s;
-  color: rgba(235, 235, 245, .6);;
+  color: rgba(235, 235, 245, .6);
 }
 .Footer a:hover {
-  color: rgba(255, 255, 245, 0.86);;
+  text-decoration-line: underline;
+  color: rgba(255, 255, 245, 0.86);
 }
-.message, .copyright {
+.message {
   line-height: 24px;
-  font-size: 14px;
   font-weight: 500;
   color: rgba(235, 235, 245, .6);
 }

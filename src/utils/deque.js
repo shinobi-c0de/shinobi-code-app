@@ -1,7 +1,7 @@
 import { Deque } from 'data-structure-typed';
 
 // Deque with max length
-export class deque {
+export class LimitedDeque {
     constructor(maxLen) {
       this.deque = new Deque();
       this.maxLen = maxLen;
