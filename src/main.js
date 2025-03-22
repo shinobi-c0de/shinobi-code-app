@@ -1,6 +1,6 @@
 import * as ort from "onnxruntime-web"
-import init, {preprocess, postprocess} from "./pkg"
-import {deque} from "./utils/deque";
+import init, {preprocess, postprocess} from "./pkg/detect_without_post_wasm"
+import {LimitedDeque} from "./utils/deque";
 import {setupRecorder, startRecording, stopRecording} from "./utils/record";
 
 import { labels_En, labels_symbol } from "./constants";
@@ -11,6 +11,8 @@ import { getJutsu, jutsuHelper, sendJutsu } from "./utils/jutsu";
 
 
 let model_path = "/models/yolox_nano_with_post.onnx";
+
+let copyright = document.getElementById("copyright");
 
 const optionsButton = document.getElementById("optionsButton");
 
@@ -42,8 +44,8 @@ let jutsu_display_time, jutsu_start_time, jutsu_display;
 let audio = new Audio('audio/hand_sign.mp3');
 
 async function setup() {
-    Port = import.meta.env.VITE_Port;
-    Message = import.meta.env.VITE_Message;
+    Port = import.meta.env.PUBLIC_Port;
+    Message = import.meta.env.PUBLIC_Message;
 
     setupRecorder();
 
@@ -78,8 +80,8 @@ async function setup() {
         StatusMsg.textContent = "Ready to go! Click Record button";
     }
 
-    sign_display_queue = new deque(15);
-    sign_history_queue = new deque(15);
+    sign_display_queue = new LimitedDeque(15);
+    sign_history_queue = new LimitedDeque(15);
 
     record_interval = 3;
     sign_interval = 3;
@@ -113,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async() => {
     canvas.width = video.width;
     canvas.height = video.height;
     //console.log("Canvas Dims: ", canvas.width, canvas.height);
-    
+    copyright.textContent = `Copyright © ${new Date().getFullYear()}`
     await setup();
 })
 

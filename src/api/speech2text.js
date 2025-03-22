@@ -38,7 +38,7 @@ export async function speech2Text(audioBlob) {
   }
 
 async function speech2TextAPI(audio) {
-  let endpoint = import.meta.env.VITE_ShinobiCodeAPI;
+  let endpoint = import.meta.env.PUBLIC_ShinobiCodeAPI;
   
   try {
     const formData = new FormData();
