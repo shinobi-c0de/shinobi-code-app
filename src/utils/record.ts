@@ -1,11 +1,11 @@
-import { MediaRecorder, register } from 'extendable-media-recorder';
+import { IMediaRecorder, MediaRecorder, register } from 'extendable-media-recorder';
 import { connect } from 'extendable-media-recorder-wav-encoder';
-import {speech2Text}  from "../api/speech2text";
+import { speech2Text }  from '../api/speech2text';
 
-const video = document.getElementById("video");
+const video = document.getElementById("video") as HTMLVideoElement;
 
-let mediaRecorder;
-let audioChunks = []; // Array to store audio chunks
+let mediaRecorder: IMediaRecorder;
+let audioChunks: Blob[] = []; // Array to store audio chunks
 
 export async function setupRecorder() {
     await register(await connect());
@@ -17,6 +17,11 @@ export async function setupRecorder() {
             audio: { echoCancellation: true, } 
         });
         const videoStream = new MediaStream(stream.getVideoTracks());
+
+        if (!video) {
+            console.error("Video element not found in the document.");
+            return;
+        }
         video.srcObject = videoStream;
         video.play();
 
@@ -32,7 +37,7 @@ export async function setupRecorder() {
         };
 
     } catch (error) {
-        console.error('Error accessing user-facing camera:', err);
+        console.error('Error accessing user-facing camera:', error);
     }
 }
 

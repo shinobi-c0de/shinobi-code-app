@@ -3,7 +3,7 @@ import init, {preprocess, postprocess} from "./pkg/detect_without_post_wasm"
 import {LimitedDeque} from "./utils/deque";
 import {setupRecorder, startRecording, stopRecording} from "./utils/record";
 
-import { labels_En, labels_symbol } from "./constants";
+import { port, message, labels_En, labels_symbol } from "./constants";
 import { checkPort, createFaceLandmarker } from "./utils/utils";
 import { sharingan_keys, detect } from "./utils/iris";
 import { getJutsu, jutsuHelper, sendJutsu } from "./utils/jutsu";
@@ -27,7 +27,7 @@ const handSigns = document.getElementById("handSigns");
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
-let Mode, Message, Port;
+let Mode;
 let isRecording, isActive;
 let Session, inputName, outputName;
 let speechText, timeout, jutsu, Jutsu;
@@ -44,8 +44,6 @@ let jutsu_display_time, jutsu_start_time, jutsu_display;
 let audio = new Audio('audio/hand_sign.mp3');
 
 async function setup() {
-    Port = import.meta.env.PUBLIC_Port;
-    Message = import.meta.env.PUBLIC_Message;
 
     setupRecorder();
 
@@ -54,7 +52,7 @@ async function setup() {
         mainContent.style.display = 'flex'; // Display Main content
 
         // Check if Jutsu data need to be send to extension
-        Mode = await checkPort(Port, Message);
+        Mode = await checkPort(port, message);
 
     }
     else {
@@ -73,6 +71,7 @@ async function setup() {
 
     faceLandmarker = await createFaceLandmarker();
     if (faceLandmarker) console.log("Iris detection model loaded.");
+    await faceLandmarker.detect(canvas); // Dummy call to load the model
 
     init().then(() => {console.log("WASM Initialized.")});
 
@@ -236,11 +235,9 @@ async function processFrame() {
     let outputData = results[outputName].cpuData
 
     if (sharingan_keys.includes(jutsu)) {
-        let landmarks;
-
-        const Iresults = await faceLandmarker.detect(canvas);
+        let Iresults = await faceLandmarker.detect(canvas);
         if (Iresults.faceLandmarks[0]) {
-            landmarks = Iresults.faceLandmarks[0].map(({ x, y }) => ({ x, y }));
+            let landmarks = Iresults.faceLandmarks[0].map(({ x, y }) => ({ x, y }));
             detect(jutsu, landmarks,canvas.width,canvas.height);
         }
     }

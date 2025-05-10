@@ -3,7 +3,6 @@ import * as vision from '@mediapipe/tasks-vision'
 
 const { FaceLandmarker, FilesetResolver, DrawingUtils } = vision;
 
-//const logs = document.getElementById('logs');
 
 export async function createFaceLandmarker() {
   try {
@@ -26,7 +25,7 @@ export async function createFaceLandmarker() {
 }
 }
 
-export async function checkPort(port, expectedMessage) {
+export async function checkPort(port: string, expectedMessage: string) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 2000); // 2-second timeout
 
@@ -39,16 +38,23 @@ export async function checkPort(port, expectedMessage) {
           return data.message === expectedMessage ? 'App' : 'Unknown';
       }
   } catch (error) {
-      if (error.name === 'AbortError') {
-          console.error(`Endpoint: http://localhost:${port}/ timed out.`);
-      } else {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.error(`Endpoint: http://localhost:${port}/ timed out.`);
+      } else if (error instanceof Error) {
           console.error("Port check failed:", error.message);
+      } else {
+        console.error("Unknown error during port check.", error);
       }
       return 'Closed';
   }
 }
 
-export function addLog(message) {
+export function addLog(message: string) {
+  const logs = document.getElementById('logs');
+  if (!logs) {
+    console.error("Logs element not found in the document.");
+    return;
+  }
   const logEntry = document.createElement('div');
   logEntry.classList.add('log-entry');
 

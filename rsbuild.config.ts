@@ -1,6 +1,6 @@
 import { defineConfig } from '@rsbuild/core';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     server: {
         headers: {
             'Cross-Origin-Opener-Policy': 'same-origin',
@@ -15,11 +15,18 @@ export default defineConfig({
     },
     plugins: [],
     html: {
-        template: './index.html',
+        template({ entryName }) {
+            const templates = {
+                index: './index.html',
+                ...(command === 'dev' && {'test': './test/index.html'}),
+            };
+            return templates[entryName] || './index.html';
+        },
     },
     source: {
         entry: {
-        index: './src/main.js',
+            index: './src/main.js',
+            ...(command === 'dev' && {'test': './test/main.ts'}),
         },
     },
-});
+}));
