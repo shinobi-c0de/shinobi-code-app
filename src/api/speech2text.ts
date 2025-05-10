@@ -1,9 +1,10 @@
 import * as wanakana from 'wanakana'
 import jutsuData from '../utils/jutsu.json'
+import { endpoint } from '../constants';
 
-const StatusMsg = document.getElementById("StatusMsg");
+const StatusMsg = document.getElementById("StatusMsg") as HTMLElement;
 
-export async function speech2Text(audioBlob) {
+export async function speech2Text(audioBlob: Blob): Promise<string | null> {
   let transcript, speechText;
   const jutsuList = Object.keys(jutsuData);
 
@@ -37,9 +38,7 @@ export async function speech2Text(audioBlob) {
   return speechText;
   }
 
-async function speech2TextAPI(audio) {
-  let endpoint = import.meta.env.PUBLIC_ShinobiCodeAPI;
-  
+async function speech2TextAPI(audio: Blob) {
   try {
     const formData = new FormData();
     formData.append('file', audio, 'recording.wav');

@@ -1,3 +1,8 @@
+export const port = process.env.PUBLIC_Port;
+export const message = process.env.PUBLIC_Message;
+export const endpoint = process.env.PUBLIC_ShinobiCodeAPI;
+
+
 export const labels_En = ['None',
     'Rat',
     'Ox',

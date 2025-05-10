@@ -12,8 +12,7 @@ const Sasuke = '/images/sharingan/sharingan_7.png'
 const Obito = '/images/sharingan/sharingan_4.png'
 
 
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
 const eyeImage = new Image();
 eyeImage.src = '/images/sharingan/sharingan_1.png';
@@ -28,6 +27,7 @@ const sharingan = {
     "amaterasu": Sasuke,
     "kamui": Obito,
 }
+type Sharingan = keyof typeof sharingan;
 
 export const sharingan_keys = Object.keys(sharingan)
 
@@ -56,7 +56,7 @@ let irisVisible = 0.70
 let sharinganSize = 120
 
 
-function findDistance(p1, p2) {
+function findDistance(p1: { x: number, y: number }, p2: { x: number, y: number }) {
     let { x: x1, y: y1 } = p1
     let { x: x2, y: y2 } = p2
     let distance = Math.hypot(x2 - x1, y2 - y1)
@@ -64,14 +64,16 @@ function findDistance(p1, p2) {
     return distance
 }
 
-export function addSharingan(centerAxis, radius) {
+export function addSharingan(centerAxis: number[], radius: number) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
     let wh = Math.round(radius * 2);
     let axis = centerAxis.map(x => Math.round(x - radius));
     ctx.drawImage(eyeImage, axis[0], axis[1], wh, wh)
 }
 
-export function detect(jutsu, landmarks, img_w, img_h) {
-
+export function detect(jutsu: string, landmarks: { x: number; y: number }[], img_w: number, img_h: number) {
     // Convert landmarks to tensor
     let landmarksTensor = tf.tensor2d(landmarks.map(p => [p.x * img_w, p.y * img_h]));
 
@@ -115,9 +117,9 @@ export function detect(jutsu, landmarks, img_w, img_h) {
     landmarksTensor.dispose()
 }
 
-function mapSharingan(jutsu) {
+function mapSharingan(jutsu: string) {
     if (sharingan_keys.includes(jutsu)) {
-        eyeImage.src = sharingan[jutsu]
+        eyeImage.src = sharingan[jutsu as Sharingan];
     }
 }
 

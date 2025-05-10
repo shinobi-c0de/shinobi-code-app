@@ -1,12 +1,20 @@
-import jutsuData from './jutsu.json';
+import { LimitedDeque } from './deque';
+import Jutsu from './jutsu.json' assert { type: 'json' };
+
+interface JutsuEntry {
+  type: string;
+  handsign: string[];
+}
+
+const jutsuData: Record<string, JutsuEntry> = Jutsu;
 
 let audio_base = new Audio();
 let audio_extra = new Audio();
 audio_base.volume = 0.5;
 //let Jutsu;
 // Jutsu function
-export async function getJutsu(signHistory,speechText) {
-    let jutsu,res = [];
+export async function getJutsu(signHistory: LimitedDeque<any>,speechText: string) {
+    let jutsu,res: any = [];
 
     /*speechText = speechText.split(" ");
     for (let i = 0; i < speechText.length; i++) {
@@ -14,8 +22,8 @@ export async function getJutsu(signHistory,speechText) {
     }
     speechText = speechText.join(" ");*/
 
-    signHistory = signHistory.toArray();
-    let handSigns = signHistory.join(' ');
+    let signHistory_arr = signHistory.toArray();
+    let handSigns = signHistory_arr.join(' ');
 
     let keys = Object.keys(jutsuData);
 
@@ -25,7 +33,7 @@ export async function getJutsu(signHistory,speechText) {
     }
 
     for (let i = 0; i < res.length; i++) {
-        if( speechText === res[i]) jutsu = res[i];
+        if( res[i] === speechText) jutsu = res[i];
     }
     if (jutsu) playJutsuSound(jutsu);
     //jutsu = keys.find(key => jutsuData[key] === handSigns);
@@ -48,7 +56,7 @@ export async function getJutsu(signHistory,speechText) {
     }
 });*/
 
-async function playJutsuSound(jutsu) {
+async function playJutsuSound(jutsu: string) {
     //Jutsu = jutsu;
 
     switch (jutsuData[jutsu].type) {
@@ -82,7 +90,7 @@ async function playJutsuSound(jutsu) {
     }
 }
 
-export function jutsuHelper(speechtext) {
+export function jutsuHelper(speechtext: string) {
     let handsigns;
     if (speechtext == "chidori") handsigns = jutsuData[speechtext].handsign[1];
     else handsigns= jutsuData[speechtext].handsign[0];
@@ -94,7 +102,7 @@ export function jutsuHelper(speechtext) {
   }
 
 //To send data to VS Code
-export async function sendJutsu(data, Port) {
+export async function sendJutsu(data: { jutsu: string }, Port: string) {
     const Data = JSON.stringify(data);
 
     try {
