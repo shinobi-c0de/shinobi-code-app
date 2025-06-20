@@ -4,8 +4,8 @@ import { endpoint } from '../constants';
 
 const StatusMsg = document.getElementById("StatusMsg") as HTMLElement;
 
-export async function speech2Text(audioBlob: Blob): Promise<string | null> {
-  let transcript, speechText;
+export async function speech2Text(audioBlob: Blob) {
+  let transcript, speechText: string = "";
   const jutsuList = Object.keys(jutsuData);
 
   StatusMsg.textContent = "Transcribing... Please Wait";
@@ -14,16 +14,16 @@ export async function speech2Text(audioBlob: Blob): Promise<string | null> {
   if (transcript) speechText = transcript;
   
   if (speechText) {
-    speechText = speechText.split(" ");
-    for (let i = 0; i < speechText.length; i++) {
-        if (speechText[i] === "technique") speechText[i] = "jutsu";
+    let speechText_arr = speechText.split(" ");
+    for (let i = 0; i < speechText_arr.length; i++) {
+        if (speechText_arr[i] === "technique") speechText_arr[i] = "jutsu";
     }
-    speechText = speechText.join(" ");
+    speechText = speechText_arr.join(" ");
     
     if (!jutsuList.includes(speechText)) {
       StatusMsg.textContent = `Speech recognition error: Stop recording and please try again!`
       console.error(`Speech recognition error: You said, "${speechText}"`)
-      speechText = null
+      speechText = ""
     }
   }
 
@@ -32,7 +32,7 @@ export async function speech2Text(audioBlob: Blob): Promise<string | null> {
   if (isJapanese) {
     StatusMsg.textContent = "Speech recognition error: Stop recording and please try again!"
     console.error(`Speech recognition error: SpeechText returned without translation, "${speechText}"`)
-    speechText = null
+    speechText = ""
   }
 
   return speechText;

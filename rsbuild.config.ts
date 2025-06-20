@@ -25,8 +25,8 @@ export default defineConfig(({ command }) => ({
     },
     source: {
         entry: {
-            index: './src/main.js',
-            ...(command === 'dev' && {'test': './test/main.ts'}),
+            index: './src/index.ts',
+            ...(command === 'dev' && {'test': './test/index.ts'}),
         },
     },
 }));

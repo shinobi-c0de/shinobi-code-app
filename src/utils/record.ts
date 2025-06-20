@@ -42,14 +42,14 @@ export async function setupRecorder() {
 }
 
 export function startRecording() {
-    if(!mediaRecorder) return null;
+    if(!mediaRecorder) throw new Error("MediaRecorder is not initialized.");
 
     audioChunks = [];
     mediaRecorder.start();
 }
 
-export async function stopRecording() {
-    if (!mediaRecorder) return null;
+export async function stopRecording(): Promise<string> {
+    if (!mediaRecorder) throw new Error("MediaRecorder is not initialized.");
 
     return new Promise((resolve, reject) => {
         // Event handler for recording stopped
@@ -60,7 +60,7 @@ export async function stopRecording() {
             try {
                 let speechText = await speech2Text(audioBlob);
                 
-                if (speechText != null) {
+                if (speechText != null && speechText.trim() !== "") {
                     console.log("Speech Text: ", speechText);
                     resolve(speechText);
                 }

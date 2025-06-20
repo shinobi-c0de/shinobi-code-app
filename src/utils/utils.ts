@@ -1,10 +1,9 @@
 
 import * as vision from '@mediapipe/tasks-vision'
-
+import { FaceLandmarkerInstance } from '../types/types'
 const { FaceLandmarker, FilesetResolver, DrawingUtils } = vision;
 
-
-export async function createFaceLandmarker() {
+export async function createFaceLandmarker(): Promise<FaceLandmarkerInstance> {
   try {
   const filesetResolver = await FilesetResolver.forVisionTasks(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
@@ -20,9 +19,9 @@ export async function createFaceLandmarker() {
   });
 
   return faceLandmarker;
-} catch (error) {
-  console.error("Error initializing FaceLandmarker:", error);
-}
+  } catch (error) {
+    throw new Error("Error initializing FaceLandmarker:" + error);
+  }
 }
 
 export async function checkPort(port: string, expectedMessage: string) {
@@ -33,10 +32,12 @@ export async function checkPort(port: string, expectedMessage: string) {
       let response = await fetch(`http://localhost:${port}/`, { signal: controller.signal });
       clearTimeout(timeoutId); // Clear timeout if request succeeds
 
-      if (response.ok) {
-          let data = await response.json();
-          return data.message === expectedMessage ? 'App' : 'Unknown';
+      if (!response.ok) {
+        return "Closed"; // Handle non-200s
       }
+
+      let data = await response.json();
+      return data.message === expectedMessage ? 'App' : 'Unknown';
   } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         console.error(`Endpoint: http://localhost:${port}/ timed out.`);
