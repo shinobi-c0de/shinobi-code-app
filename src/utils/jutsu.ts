@@ -1,5 +1,5 @@
 import { LimitedDeque } from './deque';
-import Jutsu from './jutsu.json' assert { type: 'json' };
+import Jutsu from './jutsu.json';
 
 interface JutsuEntry {
   type: string;
@@ -14,7 +14,7 @@ audio_base.volume = 0.5;
 //let Jutsu;
 // Jutsu function
 export async function getJutsu(signHistory: LimitedDeque<any>,speechText: string) {
-    let jutsu,res: any = [];
+    let jutsu: string = "", res: any = [];
 
     /*speechText = speechText.split(" ");
     for (let i = 0; i < speechText.length; i++) {
@@ -91,12 +91,12 @@ async function playJutsuSound(jutsu: string) {
 }
 
 export function jutsuHelper(speechtext: string) {
-    let handsigns;
-    if (speechtext == "chidori") handsigns = jutsuData[speechtext].handsign[1];
+    let handsigns = "", handsigns_arr = [];
+    if (speechtext === "chidori") handsigns = jutsuData[speechtext].handsign[1];
     else handsigns= jutsuData[speechtext].handsign[0];
   
-    handsigns = handsigns.split(' ')
-    let handsigns_display = handsigns.join(" -> ")
+    handsigns_arr = handsigns.split(' ')
+    let handsigns_display = handsigns_arr.join(" -> ")
   
     return handsigns_display
   }
