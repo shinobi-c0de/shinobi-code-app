@@ -160,6 +160,7 @@ video.addEventListener('play', () => {
             }
             if ((Math.floor(Date.now() / 1000) - jutsu_start_time) > jutsu_display_time) {
                 jutsu_display = '';
+                jutsu = '';
             }
             if(sign_start_time !== 0) {
                 if (Math.floor(Date.now() / 1000) - sign_start_time > timeout) {
