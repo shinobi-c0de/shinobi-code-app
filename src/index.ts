@@ -178,7 +178,7 @@ video.addEventListener('play', () => {
    draw();
 });
 
-optionsButton.addEventListener("click", () => {
+/*optionsButton.addEventListener("click", () => {
     if (!isActive) {
         isActive = true;
         optionsButton.classList.add('active');
@@ -187,7 +187,7 @@ optionsButton.addEventListener("click", () => {
         isActive = false;
         optionsButton.classList.remove('active');
     }
-})
+})*/
 
 recordButton.addEventListener("click", async () => {
     if (!isRecording) {
