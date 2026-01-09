@@ -6,7 +6,7 @@
   },
   "env": {
     "dev": {
-      "workers_dev": true
+      "workers_dev": true,"name": "shinobi-code-demo"
     }
   }
 }
