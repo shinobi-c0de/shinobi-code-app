@@ -1,100 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shinobi Web</title>
-    <link rel="icon" href="images/shinobi-light.png" type="image/x-icon">
-    <link rel="preload" href="/font/KouzanMouhitu.otf" as="font" type="font/ttf" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="preload" href="/fonts/KouzanMouhitu.ttf" as="font" type="font/ttf" crossorigin />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shinobi Code App</title>
 </head>
+
 <body>
-    <header class="nav">
-        <div class="navbar">
-            <div class="wrapper">
-                <div class="navcontainer">
-                    <div class="title">
-                        <a class="title" href="">
-                            <img class="logo" src="/images/shinobi-light.png" alt="Shinobi Code">
-                            <span>Shinobi Code</span>
-                        </a>
-                    </div>
-                    <div class="content">
-                        <div class="content-body">
-                            <div class="social-link">
-                                <a class="social-link" href="https://github.com/shinobi-c0de" target="_blank">
-                                    <span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-                                        </svg>               
-                                    </span>   
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main>
-        <div class="container">
-            <!-- BACKGROUND -->
-            <div id="background"></div>
-            
-            <div class="logo-container">
-                <div class="Logo">
-                    <img src="images/Shinobi_Code.png" alt="Shinobi-Code Logo">
-                </div>
-                <!--<div class="options-container">
-                    <button type="button" id="optionsButton" class="hamburger">
-                        <span class="options">
-                            <span class="top"></span>
-                            <span class="middle"></span>
-                            <span class="bottom"></span>
-                        </span>
-                    </button>
-                </div>-->
-            </div>
-
-            <div class="video-container">
-                <video class="video" id="video" width="1280" height="720" autoplay playsinline></video>
-                <canvas class="canvas" id="canvas"></canvas>
-                <canvas class="overlay" id="overlay"></canvas>
-            </div>
-
-            <div class="StatusMsg">
-                <p id="StatusMsg"></p>
-            </div>
-            <div class="jutsuHelp">
-                <p id="jutsuHelp">
-                    <span id="handSigns" class="handsigns"></span>
-                </p>
-            </div>
-
-            <div class="button-container">
-                <button type="image" class="rec-button" id="recordButton" title="Record Jutsu">
-                    <img id="image" src="images/shinobi-dark.png" alt="Record Button">
-                </button>
-            </div>
-        </div>
-    </main>
-    <div class="block-container">
-        <div class="info custom-block">
-            <p class="custom-block-title">Need Help ?</p>
-            <p>Please visit our <a href="https://dev.shinobi-code.com/docs/get-started/getting-started" title="Docs Site" target="_blank">documentation site</a> before geting started.</p>
-        </div>
-    </div>
-
-    <footer class="Footer">
-        <div class="Container">
-            <p class="message">Built with ❤️ in this chaotic world.<br>
-                <span id="copyright"></span>
-                <a href="https://github.com/shinobi-c0de" target="_blank"><strong>Shinobi Code</strong></a>
-            </p>
-        </div>
-    </footer>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
+
 </html>

@@ -1,75 +1,78 @@
-import { IMediaRecorder, MediaRecorder, register } from 'extendable-media-recorder';
-import { connect } from 'extendable-media-recorder-wav-encoder';
-import { speech2Text }  from '../api/speech2text';
-
-const video = document.getElementById("video") as HTMLVideoElement;
+import {
+	type IMediaRecorder,
+	MediaRecorder,
+	register,
+} from "extendable-media-recorder";
+import { connect } from "extendable-media-recorder-wav-encoder";
+import { speech2Text } from "../services/speech2text";
 
 let mediaRecorder: IMediaRecorder;
-let audioChunks: Blob[] = []; // Array to store audio chunks
+let audioChunks: Blob[] = [];
+let isRegistered = false;
 
-export async function setupRecorder() {
-    await register(await connect());
+/**
+ * Initializes the recorder with a MediaStream.
+ * Handles one-time registration of the WAV encoder.
+ */
+export async function setupRecorder(stream: MediaStream) {
+	if (!isRegistered) {
+		await register(await connect());
+		isRegistered = true;
+	}
 
-    try {
-        // Request microphone access
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "user" }, 
-            audio: { echoCancellation: true, } 
-        });
-        const videoStream = new MediaStream(stream.getVideoTracks());
+	try {
+		// Use audio tracks from the webcam/microphone stream
+		const audioStream = new MediaStream(stream.getAudioTracks());
 
-        if (!video) {
-            console.error("Video element not found in the document.");
-            return;
-        }
-        video.srcObject = videoStream;
-        video.play();
+		mediaRecorder = new MediaRecorder(audioStream, {
+			mimeType: "audio/wav",
+		});
 
-        const audioStream = new MediaStream(stream.getAudioTracks());
-        // Create a MediaRecorder instance with WAV MIME type
-        mediaRecorder = new MediaRecorder(audioStream, { 
-            mimeType: 'audio/wav'
-        });
-
-        // Event handler for data available event
-        mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-        };
-
-    } catch (error) {
-        console.error('Error accessing user-facing camera:', error);
-    }
+		mediaRecorder.ondataavailable = (event) => {
+			if (event.data.size > 0) {
+				audioChunks.push(event.data);
+			}
+		};
+	} catch (error) {
+		console.error("Failed to setup audio recorder:", error);
+	}
 }
 
+/**
+ * Starts the audio recording session.
+ */
 export function startRecording() {
-    if(!mediaRecorder) throw new Error("MediaRecorder is not initialized.");
+	if (!mediaRecorder) throw new Error("MediaRecorder is not initialized.");
 
-    audioChunks = [];
-    mediaRecorder.start();
+	audioChunks = [];
+	mediaRecorder.start();
 }
 
+/**
+ * Stops the recording and returns the transcribed text.
+ */
 export async function stopRecording(): Promise<string> {
-    if (!mediaRecorder) throw new Error("MediaRecorder is not initialized.");
+	if (!mediaRecorder) throw new Error("MediaRecorder is not initialized.");
 
-    return new Promise((resolve, reject) => {
-        // Event handler for recording stopped
-        mediaRecorder.onstop = async() => {
-            // Create blob from the recorded chunks
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            audioChunks = [];
-            try {
-                let speechText = await speech2Text(audioBlob);
-                
-                if (speechText != null && speechText.trim() !== "") {
-                    console.log("Speech Text: ", speechText);
-                    resolve(speechText);
-                }
-            } catch (error) {
-                console.error("Speech recognition error:", error);
-                reject(error);
-            }
-        };
-    
-        mediaRecorder.stop();
-    });
-  }
+	return new Promise((resolve, reject) => {
+		mediaRecorder.onstop = async () => {
+			const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+			audioChunks = [];
+
+			try {
+				const speechText = await speech2Text(audioBlob);
+				if (speechText?.trim()) {
+					console.log("Transcription:", speechText);
+					resolve(speechText);
+				} else {
+					resolve("");
+				}
+			} catch (error) {
+				console.error("Speech recognition failed:", error);
+				reject(error);
+			}
+		};
+
+		mediaRecorder.stop();
+	});
+}

@@ -1,15 +1,15 @@
 {
-  "name": "detect_without_post_wasm",
-  "type": "module",
-  "version": "0.1.0",
-  "files": [
-    "detect_without_post_wasm_bg.wasm",
-    "detect_without_post_wasm.js",
-    "detect_without_post_wasm.d.ts"
-  ],
-  "main": "detect_without_post_wasm.js",
-  "types": "detect_without_post_wasm.d.ts",
-  "sideEffects": [
-    "./snippets/*"
-  ]
+	"name": "detect_without_post_wasm",
+	"type": "module",
+	"version": "0.1.0",
+	"files": [
+		"detect_without_post_wasm_bg.wasm",
+		"detect_without_post_wasm.js",
+		"detect_without_post_wasm.d.ts"
+	],
+	"main": "detect_without_post_wasm.js",
+	"types": "detect_without_post_wasm.d.ts",
+	"sideEffects": [
+		"./snippets/*"
+	]
 }

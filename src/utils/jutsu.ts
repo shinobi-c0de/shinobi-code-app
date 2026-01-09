@@ -1,120 +1,108 @@
-import { LimitedDeque } from './deque';
-import Jutsu from './jutsu.json';
+import Jutsu from "../data/jutsu.json";
+import handSignSfx from "../assets/audio/hand_sign.mp3";
+import JutsuSfx from "../assets/audio/jutsu.mp3";
+import SharinganSfx from "../assets/audio/sharingan.mp3";
+import ChidoriSfx from "../assets/audio/chidori.mp3";
+import GenjutsuSfx from "../assets/audio/sonosharingan.mp3";
+
 
 interface JutsuEntry {
-  type: string;
-  handsign: string[];
+	type: string;
+	handsign: string[];
 }
 
 const jutsuData: Record<string, JutsuEntry> = Jutsu;
 
-let audio_base = new Audio();
-let audio_extra = new Audio();
-audio_base.volume = 0.5;
-//let Jutsu;
-// Jutsu function
-export async function getJutsu(signHistory: LimitedDeque<any>,speechText: string) {
-    let jutsu: string = "", res: any = [];
+// Audio Instance Management
+const handSignAudio = new Audio(handSignSfx);
+const jutsuAudio = new Audio();
+handSignAudio.volume = 0.5;
+jutsuAudio.volume = 0.5;
 
-    /*speechText = speechText.split(" ");
-    for (let i = 0; i < speechText.length; i++) {
-        speechText[i] = speechText[i][0].toUpperCase() + speechText[i].slice(1);
-    }
-    speechText = speechText.join(" ");*/
-
-    let signHistory_arr = signHistory.toArray();
-    let handSigns = signHistory_arr.join(' ');
-
-    let keys = Object.keys(jutsuData);
-
-    for (let key in keys) {
-        let data = keys[key];
-        if(jutsuData[data].handsign.includes(handSigns)) res.push(data);
-    }
-
-    for (let i = 0; i < res.length; i++) {
-        if( res[i] === speechText) jutsu = res[i];
-    }
-    if (jutsu) playJutsuSound(jutsu);
-    //jutsu = keys.find(key => jutsuData[key] === handSigns);
-    return jutsu;
+export function playHandSignSound() {
+	handSignAudio.currentTime = 0;
+	handSignAudio.play().catch(() => { /*comments to suppress linting*/ });
 }
 
-//Event handler to play audio unique to jutsu once base audio is finished
-/*audio_base.addEventListener('ended', () => {
-    switch (Jutsu) {
-        case "chidori": {
-            audio_extra.src = "audio/chidori.mp3";
-            audio_extra.play();
-            break;
-        }
-        case "genjutsu": {
-            audio_extra.src = "audio/sonosharingan.mp3";
-            audio_extra.play();
-            break;
-        }
-    }
-});*/
-
 async function playJutsuSound(jutsu: string) {
-    //Jutsu = jutsu;
+	const data = jutsuData[jutsu];
+	if (!data) return;
 
-    switch (jutsuData[jutsu].type) {
-        case "jutsu": {
-            audio_base.src = "audio/jutsu.mp3"; 
-            await audio_base.play();
-            break;
-        }
-        case "sharingan": {
-            audio_base.src = "audio/sharingan.mp3"; 
-            await audio_base.play();
-            break;
-        }
-        case "rinnegan": {
-            audio_base.src = "audio/jutsu.mp3"; 
-            await audio_base.play();
-            break;
-        }
-    }
-    switch (jutsu) {
-        case "chidori": {
-            audio_extra.src = "audio/chidori.mp3";
-            audio_extra.play();
-            break;
-        }
-        case "genjutsu": {
-            audio_extra.src = "audio/sonosharingan.mp3";
-            audio_extra.play();
-            break;
-        }
-    }
+	// Determine the correct source
+	const isSpecial = ["chidori", "genjutsu"].includes(jutsu);
+
+	if (isSpecial) {
+		jutsuAudio.src = jutsu === "chidori" ? ChidoriSfx : GenjutsuSfx;
+	} else {
+		switch (data.type) {
+			case "sharingan":
+				jutsuAudio.src = SharinganSfx;
+				break;
+			case "rinnegan":
+			default:
+				jutsuAudio.src = JutsuSfx;
+				break;
+		}
+	}
+
+	jutsuAudio.currentTime = 0;
+	await jutsuAudio.play().catch(() => { /**/ });
+}
+
+// Jutsu logic updated to accept combination directly
+export async function getJutsu(
+	combination: string[],
+	speechText: string,
+) {
+	const currentCombination = combination.join(" ");
+	let matchedJutsu = "";
+
+	// Find all jutsus that match the current hand sign sequence
+	const possibleJutsus = Object.keys(jutsuData).filter(key =>
+		jutsuData[key].handsign.includes(currentCombination)
+	);
+
+	// If a voice command (speechText) matches one of the possible jutsus, activate it
+	for (const jutsu of possibleJutsus) {
+		if (jutsu === speechText.toLowerCase().trim()) {
+			matchedJutsu = jutsu;
+			break;
+		}
+	}
+
+	if (matchedJutsu) {
+		await playJutsuSound(matchedJutsu);
+	}
+
+	return matchedJutsu;
 }
 
 export function jutsuHelper(speechtext: string) {
-    let handsigns = "", handsigns_arr = [];
-    if (speechtext === "chidori") handsigns = jutsuData[speechtext].handsign[1];
-    else handsigns= jutsuData[speechtext].handsign[0];
-  
-    handsigns_arr = handsigns.split(' ')
-    let handsigns_display = handsigns_arr.join(" -> ")
-  
-    return handsigns_display
-  }
+	let handsigns = "",
+		handsigns_arr = [];
+	if (speechtext === "chidori") handsigns = jutsuData[speechtext].handsign[1];
+	else handsigns = jutsuData[speechtext].handsign[0];
+
+	handsigns_arr = handsigns.split(" ");
+	const handsigns_display = handsigns_arr.join(" -> ");
+
+	return handsigns_display;
+}
 
 //To send data to VS Code
-export async function sendJutsu(data: { jutsu: string }, Port: string) {
-    const Data = JSON.stringify(data);
+export async function sendJutsu(jutsu: string, Port: string) {
+	const Data = JSON.stringify({ jutsu: jutsu });
 
-    try {
-        const response = await fetch(`http://localhost:${Port}/sendJutsu`, {
-            method: 'POST', // Can be GET, PUT, DELETE etc.
-            body: Data,
-            headers: { 'Content-Type': 'application/json' }, // Specify content type
-        });
-        if (!response.ok) {
-            throw new Error(`Error sending data: ${response.statusText}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
+	try {
+		const response = await fetch(`http://localhost:${Port}/sendJutsu`, {
+			method: "POST", // Can be GET, PUT, DELETE etc.
+			body: Data,
+			headers: { "Content-Type": "application/json" }, // Specify content type
+		});
+		if (!response.ok) {
+			throw new Error(`Error sending data: ${response.statusText}`);
+		}
+	} catch (error) {
+		console.error("Error:", error);
+	}
 }
