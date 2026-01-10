@@ -22,12 +22,27 @@ export const ModelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     useEffect(() => {
         let mounted = true;
 
+        // Detect mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+        ) || window.innerWidth < 768;
+
         const loadModels = async () => {
             // Prevent double loading if already loaded or loading
             if (isReady || isLoading) return;
 
             setIsLoading(true);
             try {
+                // Skip initialization, if mobile
+                if (isMobile) {
+                    if (mounted) {
+                        setMode("Mobile");
+                        setIsReady(true);
+                        setIsLoading(false);
+                    }
+                    return;
+                }
+
                 // Initialize WASM first
                 init_wasm();
 

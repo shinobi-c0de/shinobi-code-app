@@ -10,9 +10,9 @@ import { useModelContext } from "../context/ModelContext";
 
 import { processFrame } from "../utils/inference";
 import { drawBbox } from "../utils/draw";
-import { labels_En, /*port*/ } from "../utils/constants";
+import { labels_En, port } from "../utils/constants";
 import { playHandSignSound, getJutsu } from "../utils/jutsu"
-//import { sendJutsu } from "../utils/jutsu";
+import { sendJutsu } from "../services/jutsu";
 import { sharingan_keys } from "../utils/sharingan";
 
 
@@ -64,7 +64,7 @@ export default function Main() {
                     }
                     // Success! Reset state after a short delay so user can see it
                     if (mode === "App") {
-                        //sendJutsu(matched, port);
+                        sendJutsu(matched, port);
                     }
                     /*setTimeout(() => {
                         setCombination([]);
@@ -76,7 +76,7 @@ export default function Main() {
             }
         };
         triggerJutsu();
-    }, [combination, currentJutsu]);
+    }, [combination, currentJutsu, mode]);
 
     // The Camera Loop! 
     const onDraw = useCallback(async (ctx: CanvasRenderingContext2D) => {
@@ -162,7 +162,7 @@ export default function Main() {
     const isReady = webcamReady && modelsReady;
 
     return (
-        <div className="flex flex-col items-center min-h-screen p-4 w-full gap-8">
+        <div className="hidden md:flex flex-col items-center min-h-screen p-4 w-full gap-8">
             <div className="relative w-full max-w-3xl aspect-video rounded-2xl overflow-hidden shadow-2xl border-4 border-indigo-500/30 bg-zinc-950">
                 <CameraView
                     webcamRef={webcamRef}
