@@ -70,8 +70,7 @@ export default function Main() {
                         //setCombination([]);
                         setCurrentJutsu("");
                         //lastSignRef.current = null; // Reset last sign on success
-
-                    }, 9500);
+                    }, 8500); // To match the main timer
                 }
             }
         };
