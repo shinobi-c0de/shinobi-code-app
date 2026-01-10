@@ -38,7 +38,7 @@ export default function Main() {
         }
         activityTimerRef.current = setTimeout(() => {
             setCombination([]);
-            setCurrentJutsu("");
+            //setCurrentJutsu("");
             isSharingan.current = false;
             lastSignRef.current = null; // Reset last sign on timeout
         }, 10000); // 10 seconds
@@ -66,12 +66,12 @@ export default function Main() {
                     if (mode === "App") {
                         sendJutsu(matched, port);
                     }
-                    /*setTimeout(() => {
-                        setCombination([]);
+                    setTimeout(() => {
+                        //setCombination([]);
                         setCurrentJutsu("");
-                        lastSignRef.current = null; // Reset last sign on success
+                        //lastSignRef.current = null; // Reset last sign on success
 
-                    }, 3000);*/
+                    }, 9500);
                 }
             }
         };
