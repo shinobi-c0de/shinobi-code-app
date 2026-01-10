@@ -1,12 +1,13 @@
 {
   "name": "shinobi-code-app",
+  "workers_dev": false,
   "compatibility_date": "2026-01-10",
   "assets": {
     "directory": "./dist"
   },
   "env": {
     "dev": {
-      "workers_dev": true
+      "name": "shinobi-code-app-dev"
     }
   }
 }

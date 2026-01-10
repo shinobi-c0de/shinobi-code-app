@@ -2,7 +2,8 @@
 
 @font-face {
 	font-family: KouzanMouhitu;
-	src: url("./fonts/KouzanMouhitu.ttf");
+	src: url("./fonts/KouzanMouhitu.ttf") format("truetype");
+	font-display: swap;
 }
 
 
