@@ -21,7 +21,6 @@ export const useRecorder = () => {
         setState("processing");
         try {
             const transcript = await stopRecording();
-            if (transcript) console.log("Transcription: ", transcript);
             return transcript;
         } catch (error) {
             console.error("Failed to stop recording:", error);

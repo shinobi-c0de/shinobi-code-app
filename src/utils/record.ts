@@ -62,7 +62,6 @@ export async function stopRecording(): Promise<string> {
 			try {
 				const speechText = await speech2Text(audioBlob);
 				if (speechText?.trim()) {
-					console.log("Transcription:", speechText);
 					resolve(speechText);
 				} else {
 					resolve("");

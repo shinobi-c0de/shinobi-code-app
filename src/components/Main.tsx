@@ -27,6 +27,7 @@ export default function Main() {
     const isInferenceRunning = useRef(false);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const lastSignRef = useRef<string | null>(null); // Track last sign for audio deduplication
+    const isMatched = useRef(false);
     const isSharingan = useRef(false);
 
     // Activity timeout tracking
@@ -38,10 +39,13 @@ export default function Main() {
         }
         activityTimerRef.current = setTimeout(() => {
             setCombination([]);
-            //setCurrentJutsu("");
+            if (isMatched.current) {
+                setCurrentJutsu("");
+                isMatched.current = false;
+            }
             isSharingan.current = false;
             lastSignRef.current = null; // Reset last sign on timeout
-        }, 10000); // 10 seconds
+        }, 10000);
     }, []);
 
     // Cleanup timer on unmount
@@ -59,6 +63,7 @@ export default function Main() {
             if (combination.length > 0 && currentJutsu) {
                 const matched = await getJutsu(combination, currentJutsu);
                 if (matched) {
+                    isMatched.current = true;
                     if (sharingan_keys.includes(matched)) {
                         isSharingan.current = true;
                     }
@@ -66,11 +71,6 @@ export default function Main() {
                     if (mode === "App") {
                         sendJutsu(matched, port);
                     }
-                    setTimeout(() => {
-                        //setCombination([]);
-                        setCurrentJutsu("");
-                        //lastSignRef.current = null; // Reset last sign on success
-                    }, 8500); // To match the main timer
                 }
             }
         };
@@ -154,6 +154,7 @@ export default function Main() {
     const handleStop = async () => {
         const transcript = await stopRec();
         if (transcript) {
+            console.log("Transcription: ", transcript);
             setCurrentJutsu(transcript.toLowerCase().trim());
         }
     };

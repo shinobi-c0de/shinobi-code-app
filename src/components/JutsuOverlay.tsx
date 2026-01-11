@@ -54,7 +54,7 @@ export default function JutsuOverlay({ isReady, currentJutsu, combination }: Jut
                                 <span className="px-2 py-0.5 bg-indigo-500/20 rounded border border-indigo-500/30 text-indigo-300 text-[10px] font-bold">
                                     {sign}
                                 </span>
-                                {i < combination.length - 1 && <span className="text-white/20 text-[8px]">→</span>}
+                                {i < combination.length - 1 && <span className="text-white/30 text-[8px]">→</span>}
                             </div>
                         ))
                     ) : (
