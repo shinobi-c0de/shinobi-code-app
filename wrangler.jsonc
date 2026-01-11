@@ -8,6 +8,9 @@
   "env": {
     "dev": {
       "name": "shinobi-code-app-dev"
+    },
+    "prod": {
+      "name": "shinobi-code-app"
     }
   }
 }
