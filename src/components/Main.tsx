@@ -178,6 +178,10 @@ export default function Main() {
                     isReady={isReady}
                     currentJutsu={currentJutsu}
                     combination={combination}
+                    onReset={() => {
+                        setCombination([]);
+                        lastSignRef.current = null;
+                    }}
                 />
             </div>
 
