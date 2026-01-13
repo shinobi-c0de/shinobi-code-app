@@ -95,9 +95,11 @@ export default function JutsuOverlay({ isReady, currentJutsu, combination, onRes
                     {combination.length > 0 ? (
                         combination.map((sign, i) => {
                             const status = getSignStatus(sign, i);
+                            // Use combination length as part of key to force re-render after reset
+                            const uniqueKey = `${combination.length}-${i}-${sign}`;
                             return (
-                                <div key={i} className="flex items-center gap-1.5 flex-shrink-0">
-                                    <span className={`px-2 py-0.5 rounded border text-[10px] font-bold transition-colors duration-200 ${getSignStyles(status)}`}>
+                                <div key={uniqueKey} className="flex items-center gap-1.5 flex-shrink-0">
+                                    <span className={`px-2 py-0.5 rounded border text-[10px] font-bold ${getSignStyles(status)}`}>
                                         {sign}
                                     </span>
                                     {i < combination.length - 1 && <span className="text-white/30 text-[8px]">→</span>}
