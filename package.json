@@ -24,7 +24,7 @@
 		"wanakana": "^5.3.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.3.11",
+		"@biomejs/biome": "2.4.4",
 		"@iconify/react": "^6.0.2",
 		"@tailwindcss/vite": "^4.2.1",
 		"@types/node": "^24.10.1",
