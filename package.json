@@ -12,7 +12,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@mediapipe/tasks-vision": "0.10.22-rc.20250304",
+		"@mediapipe/tasks-vision": "0.10.32",
 		"@types/smallest-enclosing-circle": "^1.0.3",
 		"extendable-media-recorder": "^9.2.32",
 		"extendable-media-recorder-wav-encoder": "^7.0.133",
